@@ -1,0 +1,54 @@
+time_units: generations
+generation_time: 1
+demes:
+- name: YRI
+  description: 1000 Genomes YRI (Yoruba)
+  epochs:
+  - {end_time: 71429, start_size: 13010}
+  - {end_time: 14181, start_size: 13010}
+  - {end_time: 185, start_size: 27327}
+  - {end_time: 96, start_size: 32254}
+  - {end_time: 0, start_size: 50000}
+
+- name: CEU
+  description: 1000 Genomes CEU (Utah Residents (CEPH) with Northern and Western European
+    Ancestry)
+  start_time: 4727
+  ancestors: [YRI]
+  epochs:
+  - {end_time: 1827, start_size: 3261}
+  - {end_time: 185, start_size: 2894, end_size: 28303}
+  - {end_time: 133, start_size: 37628}
+  - {end_time: 96, start_size: 183812}
+  - {end_time: 69, start_size: 604020}
+  - {end_time: 50, start_size: 1317440}
+  - {end_time: 36, start_size: 2376076}
+  - {end_time: 0, start_size: 6798254}
+- name: CHB
+  description: 1000 Genomes CHB (Han Chinese in Beijing, China)
+  start_time: 1827
+  ancestors: [CEU]
+  epochs:
+  - {end_time: 185, start_size: 1174, end_size: 47768}
+  - {end_time: 0, start_size: 50000}
+- name: JPT
+  description: 1000 Genomes JPT (Japanese in Tokyo, Japan)
+  start_time: 357
+  ancestors: [CHB]
+  epochs:
+  - {end_time: 185, start_size: 5050, end_size: 34678}
+  - {end_time: 0, start_size: 50000}
+  
+migrations:
+- demes: [YRI, CEU]
+  rate: 0.000148
+  end_time: 1827.0
+- demes: [YRI, CEU]
+  rate: 9.9e-06
+  start_time: 1827.0
+- demes: [YRI, CHB]
+  rate: 5.6e-06
+- demes: [CEU, CHB]
+  rate: 4.75e-05
+- demes: [CHB, JPT]
+  rate: 3.3e-05

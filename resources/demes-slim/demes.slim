@@ -1,0 +1,303 @@
+source("demes-slim/demes.eidos");
+
+function (void)print_scriptblock(object<SLiMEidosBlock>$ sb) {
+    cat(sb.start);
+    if (sb.start != sb.end) {
+        cat(":" + sb.end);
+    }
+
+    // Remove source lines containing "dbg(self)" before printing.
+    source = sb.source;
+    lines = strsplit(source, "\n");
+    dbg_lines = strcontains(lines, "dbg(self)");
+    lines = lines[which(!dbg_lines)];
+    source = paste(lines, sep="\n");
+
+    catn(" " + sb.type + "() " + source);
+}
+
+// Print the current scriptblock, but only in the "start" generation.
+function (void)dbg(object<SLiMEidosBlock>$ self_) {
+       print_scriptblock(self_);
+}
+
+
+function (void)register_scriptblocks(
+    object<Dictionary>$ model, object<Dictionary> script_blocks, integer$ verbosity
+) {
+    nrows = nrow_dict(script_blocks);
+    if (nrows > 0) {
+        for (i in 0:(nrows-1)) {
+            sb = script_blocks.getRowValues(i);
+            start = sb.getValue("start");
+            end = sb.getValue("end");
+            type = sb.getValue("type");
+            lines = strsplit(sb.getValue("source"), "\n");
+            if (verbosity > 0) {
+                lines = c("dbg(self);", lines);
+            }
+            source = "{\n    " + paste(lines, sep="\n    ") + "\n}";
+            //catn("# registering " + start + ":" + end + " " + type + "()");
+            if (type == "early") {
+                sb = community.registerEarlyEvent(NULL, source, start, end);
+            } else if (type == "late") {
+                sb = community.registerLateEvent(NULL, source, start, end);
+            } else {
+                stop("only early and late scriptblocks are supported");
+            }
+        }
+    }
+}
+
+/*
+ Add SLiM source lines to the script_blocks between the given start and
+ end times.
+*/
+function (void)sb_add(
+    object<Dictionary> script_blocks, string lines, integer$ start,
+    [Ni$ end = NULL], [string$ type = "late"]
+) {
+    if (isNULL(end)) {
+        end = start;
+    }
+    assert(type == "early" | type == "late");
+    if (start == 1) {
+        // The script blocks are registered in generation 1 early(), so we
+        // must schedule other generation 1 blocks as late() or they won't
+        // run at all.
+        assert(type == "late");
+    }
+
+    nrows = nrow_dict(script_blocks);
+    if (nrows > 0) {
+        for (i in 0:(nrows-1)) {
+            sb = script_blocks.getRowValues(i);
+            sb_start = sb.getValue("start");
+            sb_end = sb.getValue("end");
+            sb_type = sb.getValue("type");
+            if (sb_start == start & sb_end == end & sb_type == type) {
+                // Append lines to the existing script block.
+                //catn("# appending " + start + ":" + end + " " + type + "()");
+                sb_source = sb.getValue("source");
+                source = paste(c(sb_source, lines), sep="\n");
+                //catn("# appending: " + source);
+                sources = script_blocks.getValue("source");
+                sources[i] = source;
+                script_blocks.setValue("source", sources);
+                return;
+            }
+        }
+    }
+
+    // Create a new script block.
+    //catn("# adding " + start + ":" + end + " " + type + "()");
+    source = paste(lines, sep="\n");
+    sb = Dictionary("start", start, "end", end, "type", type, "source", source);
+    script_blocks.appendKeysAndValuesFrom(sb);
+}
+
+/*
+  Construct and register the events that characterise the Demes model.
+*/
+function (void)demes_schedule_events(object<Dictionary>$ model, [integer$ verbosity=1]) {
+    script_blocks = Dictionary();
+
+    for (deme in model.getValue("demes")) {
+        name = deme.getValue("name");
+        id = get_deme_id(model, name);
+        start_time = deme.getValue("start_time");
+        epochs = deme.getValue("epochs");
+        start_size = epochs[0].getValue("start_size");
+        ancestors = deme.getValue("ancestors");
+        cloning_rate = epochs[0].getValue("cloning_rate");
+        selfing_rate = (1 - cloning_rate) * epochs[0].getValue("selfing_rate");
+        if (length(ancestors) == 0) {
+            lines = c(
+                "// " + name + ": conjured from the void",
+                "sim.addSubpop(" + id + ", " + start_size + ");",
+                "p"+id+".name = \""+name+"\";"
+            );
+            if (cloning_rate > 0) {
+                lines = c(lines, "p" + id + ".setCloningRate(" + cloning_rate + ");");
+            }
+            if (selfing_rate > 0) {
+                lines = c(lines, "p" + id + ".setSelfingRate(" + selfing_rate + ");");
+            }
+            sb_add(script_blocks, lines, start_time, type="late");
+        } else if (length(ancestors) == 1) {
+            anc_id = get_deme_id(model, ancestors[0]);
+            lines = c(
+                "// " + name + ": split from " + ancestors[0],
+                "sim.addSubpopSplit(" + id + ", " + start_size + ", " + anc_id + ");",
+                "p"+id+".name = \""+name+"\";",
+                "p"+id+".setValue(\"ancestor_id\", "+anc_id+");"
+            );
+            if (cloning_rate > 0) {
+                lines = c(lines, "p" + id + ".setCloningRate(" + cloning_rate + ");");
+            }
+            if (selfing_rate > 0) {
+                lines = c(lines, "p" + id + ".setSelfingRate(" + selfing_rate + ");");
+            }
+            sb_add(script_blocks, lines, start_time, type="early");
+        } else {
+            // multiple ancestors
+            proportions = deme.getValue("proportions");
+            assert(length(ancestors) == length(proportions));
+            anc_id = c();
+            for (ancestor in ancestors) {
+                anc_id = c(anc_id, get_deme_id(model, ancestor));
+            }
+            lines = c(
+                "// " + name + ": admixture of " + paste(ancestors),
+                "sim.addSubpop(" + id + ", " + start_size + ");",
+                "p"+id+".name = \""+name+"\";",
+                "p" + id + ".setMigrationRates(c(" + paste(anc_id, sep=", ") +
+                    "), c(" + paste(proportions, sep=", ") + "));"
+            );
+            if (cloning_rate > 0) {
+                lines = c(lines, "p" + id + ".setCloningRate(" + cloning_rate + ");");
+            }
+            if (selfing_rate > 0) {
+                lines = c(lines, "p" + id + ".setSelfingRate(" + selfing_rate + ");");
+            }
+            sb_add(script_blocks, lines, start_time, type="early");
+
+            zeros = rep(0, length(proportions));
+            lines = c(
+                "// " + name,
+                "p" + id + ".setMigrationRates(c(" + paste(anc_id, sep=", ") +
+                    "), c(" + paste(zeros, sep=", ") + "));"
+            );
+            sb_add(script_blocks, lines, start_time, type="late");
+        }
+
+        i = 0;
+        for (epoch in epochs) {
+            start_time = epoch.getValue("start_time");
+            end_time = epoch.getValue("end_time");
+            size_function = epoch.getValue("size_function");
+            start_size = epoch.getValue("start_size");
+            if (size_function == "constant") {
+                if (i > 0) {
+                    prev_size = epochs[i-1].getValue("end_size");
+                    if (start_size != prev_size) {
+                        lines = c(
+                            "// " + name + ": previous N=" + prev_size,
+                            "p" + id + ".setSubpopulationSize(" + start_size + ");"
+                        );
+                        sb_add(script_blocks, lines, start_time + 1, type="early");
+                    }
+                }
+            } else if (size_function == "exponential") {
+                end_size = epoch.getValue("end_size");
+                lines = c(
+                    "// " + name + ": exponential "
+                        + ifelse(start_size < end_size, "growth", "decline"),
+                    "start_size = " + start_size + ";",
+                    "end_size = " + end_size + ";",
+                    "r = log(end_size / start_size);",
+                    "gx = (sim.cycle - self.start + 1) / (self.end - self.start + 1);",
+                    "size = asInteger(round(start_size * exp(r * gx)));",
+                    "p" + id + ".setSubpopulationSize(size);"
+                );
+                sb_add(script_blocks, lines, start_time + 1, end_time, type="early");
+            } else {
+                stop("unexpected size_function: " + size_function);
+            }
+
+            cloning_rate = epoch.getValue("cloning_rate");
+            selfing_rate = (1 - cloning_rate) * epoch.getValue("selfing_rate");
+            do_selfing = F;
+            do_cloning = F;
+            if (i > 0) {
+                do_selfing = selfing_rate != epochs[i-1].getValue("selfing_rate");
+                do_cloning = cloning_rate != epochs[i-1].getValue("cloning_rate");
+            }
+            if (do_selfing) {
+                lines = c("p" + id + ".setSelfingRate(" + selfing_rate + ");");
+                sb_add(script_blocks, lines, start_time + 1, type="early");
+            }
+            if (do_cloning) {
+                lines = c("p" + id + ".setCloningRate(" + cloning_rate + ");");
+                sb_add(script_blocks, lines, start_time + 1, type="early");
+            }
+
+            i = i + 1;
+        }
+    }
+
+    g_end = model.getValue("end_time");
+
+    migrations = model.getValue("migrations");
+    if (length(migrations) > 0) {
+        for (migration in migrations) {
+            start_time = migration.getValue("start_time");
+            end_time = migration.getValue("end_time");
+            source = migration.getValue("source");
+            dest = migration.getValue("dest");
+            source_id = get_deme_id(model, source);
+            dest_id = get_deme_id(model, dest);
+            rate = migration.getValue("rate");
+
+            lines = c(
+                "// " + source + " -> " + dest,
+                "p" + dest_id + ".setMigrationRates("+source_id+", "+rate+");"
+            );
+            sb_add(script_blocks, lines, start_time + 1, type="early");
+
+            if (end_time != g_end) {
+                lines = c(
+                    "// " + source + " -| " + dest,
+                    "p" + dest_id + ".setMigrationRates("+source_id+", 0);"
+                );
+                sb_add(script_blocks, lines, end_time, type="late");
+            }
+        }
+    }
+
+    pulses  = model.getValue("pulses");
+    if (length(pulses) > 0) {
+        for (pulse in pulses) {
+            sources = pulse.getValue("sources");
+            dest = pulse.getValue("dest");
+            dest_id = get_deme_id(model, dest);
+            time = pulse.getValue("time");
+            proportions = pulse.getValue("proportions");
+            assert(length(sources) == length(proportions));
+
+            i = 0;
+            for (source in sources) {
+                proportion = proportions[i];
+                source_id = get_deme_id(model, source);
+                lines = c(
+                    "// " + source + " -> " + dest,
+                    "p" + dest_id + ".setMigrationRates("+source_id+", "+proportion+");"
+                );
+                sb_add(script_blocks, lines, time, type="early");
+
+                lines = c(
+                    "// " + source + " -| " + dest,
+                    "p" + dest_id + ".setMigrationRates("+source_id+", 0);"
+                );
+                sb_add(script_blocks, lines, time, type="late");
+                i = i + 1;
+            }
+        }
+    }
+
+    for (deme in model.getValue("demes")) {
+        name = deme.getValue("name");
+        id = get_deme_id(model, name);
+        epochs = deme.getValue("epochs");
+        end_time = epochs[length(epochs)-1].getValue("end_time");
+        if (end_time != g_end) {
+            lines = c(
+                "// " + name + ": extinction",
+                "p" + id + ".setSubpopulationSize(0);"
+            );
+            sb_add(script_blocks, lines, end_time, type="late");
+        }
+    }
+
+    register_scriptblocks(model, script_blocks, verbosity);
+}

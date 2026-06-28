@@ -1,0 +1,49 @@
+# Causal mutation rate:
+mu: 1.7e-10
+
+# Chromosome
+chromosome: 1
+# Chromosome arm
+arm: p
+
+# SLiM seed
+slim_seed: 100
+# Demography for simulation
+# This is the name of the YAML file that is in "resources/demography" directory
+demography: "relate_OutOfAfrica_4J17_ceu"
+
+# Number of YRI individuals in the final output
+YRI_number: 10000
+# Number of CEU individuals in the final output
+CEU_number: 500000
+# Number of CHB individuals in the final output
+CHB_number: 10000
+# Number of JPT individuals in the final output
+JPT_number: 10000
+# Seed that is used to extract individuals
+individual_seed: 10
+
+# Seed that is used in recapitation
+recapitate_seed: 99
+
+# Neutral mutation rate
+neutral_mu: 1.7e-8
+# Seed that is used in neutral simulation
+neutral_seed: 12
+
+# Proportion of causal variants to take in genetic value simulation
+proportion: 1
+# Seed that is used in genetic value simulation
+genetic_seed: 15
+
+# MAF threshold that is used in VCZ generation
+maf: 0.01
+
+
+# These parameters are important for simulations
+# but they do not need to be modified
+
+# Recombination position file
+recombination_position: "resources/recombination_map/recombination_position.csv"
+# Selection scaling parameter
+scaling_selection: 1e10

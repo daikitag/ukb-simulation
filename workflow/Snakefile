@@ -1,0 +1,213 @@
+configfile: "config/config.yaml"
+
+# These are SLiM simulation parameters
+MU = config["mu"]
+CHROMOSOME = config["chromosome"]
+ARM = config["arm"]
+SLIM_SEED = config["slim_seed"]
+DEMOGRAPHY = config["demography"]
+
+# recombination position file - put it as "resources/recombination_map/recombination_position.csv"
+RECOMBINATION_POSITION = config["recombination_position"]
+# selection scaling parameter - this is set as a constant throughout the simulation
+SELECTION_SCALING_PARAMETER = config["scaling_selection"]
+
+# These are parameters for selecting individual IDs
+YRI_NUMBER = config["YRI_number"]
+CEU_NUMBER = config["CEU_number"]
+CHB_NUMBER = config["CHB_number"]
+JPT_NUMBER = config["JPT_number"]
+INDIVIDUAL_SEED = config["individual_seed"]
+
+# Recapitate parameters
+RECAPITATE_SEED = config["recapitate_seed"]
+
+# Neutral simulation parameters
+NEUTRAL_MU = config["neutral_mu"]
+NEUTRAL_SEED = config["neutral_seed"]
+
+# VCZ generation parameter
+MAF = config["maf"]
+
+# Genetic value parameters
+PROPORTION = config["proportion"]
+GENETIC_SEED = config["genetic_seed"]
+
+# Recombination map directory
+# Modify this function if you would ike to modify the location of recombination map
+def get_recombination_map(chromosome):
+    return (
+        f"resources/recombination_map/HapMapII_GRCh38/"
+        f"genetic_map_Hg38_chr{chromosome}.txt"
+    )
+
+
+
+basic_pattern_without_chromosome  = (
+    "slim_mu_{mu}_demography_{demography}_slim_seed_{slim_seed}"
+)
+output_pattern = (
+    basic_pattern_without_chromosome + "/chr_{chromosome}{arm}"
+)
+# Folder pattern
+folder_pattern_without_chromosome = (
+    "output/" + basic_pattern_without_chromosome
+)
+folder_pattern = (
+    "output/" + output_pattern
+)
+
+# These parameters are used to sample tree sequence and select individual IDs
+individual_id_pattern = (
+    "yri_{yri}_ceu_{ceu}_chb_{chb}_jpt_{jpt}_individualseed_{individual_seed}"
+)
+# These parameters are used to sample tree sequence, select individual IDs and conduct recapitation
+sample_tree_seq_pattern = (
+    individual_id_pattern +
+    "_recap_seed_{recapitate_seed}"
+)
+
+final_ts_pattern = (
+    sample_tree_seq_pattern + "_neutralmu_{neutral_mu}_neutralseed_{neutral_seed}"
+)
+
+vcz_pattern = (
+    final_ts_pattern + "_MAF_{maf}"
+)
+
+# These parameters are used to simulate genetic values of individuals
+genetic_value_pattern = (
+    sample_tree_seq_pattern + "_prop_{proportion}_genetic_seed_{genetic_seed}"
+)
+
+
+
+plink_bed = expand(
+    f"{folder_pattern}/plink_output/plink_{vcz_pattern}.bed",
+    mu=MU, demography=DEMOGRAPHY, slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME, arm=ARM, yri=YRI_NUMBER,
+    ceu=CEU_NUMBER, chb=CHB_NUMBER, jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED, recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU, neutral_seed=NEUTRAL_SEED, maf=MAF,
+)
+
+
+genetic_output = expand(
+    f"{folder_pattern}/genetic_value_{genetic_value_pattern}.csv",
+    mu=MU, demography=DEMOGRAPHY, slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME, arm=ARM, yri=YRI_NUMBER,
+    ceu=CEU_NUMBER, chb=CHB_NUMBER, jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED, recapitate_seed=RECAPITATE_SEED,
+    proportion=PROPORTION, genetic_seed=GENETIC_SEED
+
+)
+
+rule all:
+    input:
+        plink_bed,
+        genetic_output,
+
+
+rule generate_slim_script:
+    output:
+        f"{folder_pattern}/slim_script.slim",
+    input:
+        demography = lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
+        recombination_map_file=lambda wildcards: get_recombination_map(wildcards.chromosome),
+        position_file = RECOMBINATION_POSITION,
+    conda:
+        "simulation"
+    params:
+        arm = lambda wildcards: wildcards.arm,
+        chromosome = lambda wildcards: wildcards.chromosome,
+        mu = lambda wildcards: wildcards.mu,
+        selection_scaling=SELECTION_SCALING_PARAMETER,
+        slim_seed = lambda wildcards: wildcards.slim_seed,
+    script:
+        "scripts/generate_slim_script.py"
+
+rule slim_underdominance:
+    output:
+        f"{folder_pattern}/slim_allele.tree",
+    input:
+        f"{folder_pattern}/slim_script.slim",
+    conda:
+        "simulation"
+    shell:
+        "slim -d 'tree_filename=\"{output}\"' {input}"
+    resources:
+        mem_mb_per_cpu=320000
+
+rule recapitate_sample_individuals:
+    output:
+        ts = f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",
+        individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
+    input:
+        ts = f"{folder_pattern}/slim_allele.tree",
+        demography = lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
+        recombination_map_file = lambda wildcards: get_recombination_map(wildcards.chromosome),
+        position_file = RECOMBINATION_POSITION,
+    conda:
+        "simulation"
+    params:
+        yri_number=lambda wildcards: wildcards.yri,
+        ceu_number=lambda wildcards: wildcards.ceu,
+        chb_number = lambda wildcards: wildcards.chb,
+        jpt_number = lambda wildcards: wildcards.jpt,
+        individual_seed=lambda wildcards: wildcards.individual_seed,
+        chromosome = lambda wildcards: wildcards.chromosome,
+        recapitate_seed = lambda wildcards: wildcards.recapitate_seed,
+    script:
+        "scripts/recapitate_sample_individuals.py"
+
+rule generate_vcz:
+    output:
+        ts = f"{folder_pattern}/final_output_{final_ts_pattern}.tree.tsz",
+        vcz = directory(f"{folder_pattern}/{vcz_pattern}.vcz"),
+    input:
+        ts = f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",
+        individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
+    params:
+        neutral_mu=lambda wildcards: wildcards.neutral_mu,
+        neutral_seed=lambda wildcards: wildcards.neutral_seed,
+        maf=lambda wildcards: wildcards.maf,
+    conda:
+        "simulation"
+    threads:
+        2
+    resources:
+        cpus_per_task=2,
+        mem_mb_per_cpu=160000
+    script:
+        "scripts/generate_vcz.py"
+
+rule generate_plink:
+    output:
+        bed=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.fam"
+    input:
+        directory(f"{folder_pattern}/{vcz_pattern}.vcz"),
+    conda:
+        "simulation"
+    params:
+        outprefix=lambda wildcards, output: output.bed[:-4]
+    shell:
+        "vcztools view-plink {input} -M 2 -o {params.outprefix}"
+
+rule genetic_value_simulation:
+    output:
+        genetic_df = f"{folder_pattern}/genetic_value_{genetic_value_pattern}.csv",
+        mutation_df = f"{folder_pattern}/mutation_{genetic_value_pattern}.csv",
+    input:
+        f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",
+    conda:
+        "simulation"
+    params:
+        proportion = lambda wildcards: wildcards.proportion,
+        genetic_seed = lambda wildcards: wildcards.genetic_seed,
+        selection_scaling=SELECTION_SCALING_PARAMETER,
+    script:
+        "scripts/genetic_value_simulation.py"
+
+

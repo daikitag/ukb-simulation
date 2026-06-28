@@ -1,0 +1,12 @@
+# configuration file for slurm
+executor: slurm
+jobs: 400
+slurm-logdir: "logs/slurm"
+
+default-resources:
+    slurm_account: "tagami"
+    slurm_partition: "standard-statgen-cpu"
+    cpus_per_task: 1
+    mem_mb: 100000
+    runtime: "40h"
+    slurm_extra: "--nodelist=smew01.cpu.stats.ox.ac.uk"
