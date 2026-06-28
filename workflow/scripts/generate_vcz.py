@@ -6,8 +6,6 @@ import collections
 import bio2zarr.tskit as ts2z
 import tszip
 
-from snakemake.script import snakemake as snk
-
 def drop_mutations(tables, indexes_of_mutations_to_keep):
     m = len(tables.mutations)
     tables.mutations.parent = np.zeros(m, dtype=np.int32) - 1 # null the parent column
@@ -83,22 +81,22 @@ def subset_tree_seq(ts, selected_individuals):
     return ts.simplify(selected_nodes)
 
 def main():
-    ts = tszip.load(snk.input.ts)
+    ts = tszip.load(snakemake.input.ts)
 
-    ts = maf_threshold(ts, maf=float(snk.params.maf))
+    ts = maf_threshold(ts, maf=float(snakemake.params.maf))
 
-    individual_id_df = pd.read_csv(snk.input.individual_id)
+    individual_id_df = pd.read_csv(snakemake.input.individual_id)
     
     model_mapping = ts.map_to_vcf_model(
         individuals=individual_id_df["individual_id"],
         individual_names=individual_id_df["plink_id"],
-        contig_id=str(snk.params.chromosome),
+        contig_id=str(snakemake.params.chromosome),
     )
 
     ts2z.convert(
         ts,
-        vcz_path=snk.output.vcz,
-        worker_processes=int(snk.threads),
+        vcz_path=snakemake.output.vcz,
+        worker_processes=int(snakemake.threads),
         model_mapping=model_mapping,
     )
 

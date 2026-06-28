@@ -2,8 +2,6 @@ import tskit
 import numpy as np
 import pandas as pd
 
-from snakemake.script import snakemake as snk
-
 def obtain_population_id(ts):
     population_ids = {}
 
@@ -31,21 +29,21 @@ def obtain_individual_df(ts, yri_number, ceu_number, chb_number, jpt_number, rng
     ])
 
 def main():
-    ts = tskit.load(snk.input.ts)
+    ts = tskit.load(snakemake.input.ts)
 
     # Subset tree sequence by individual IDs
-    rng = np.random.default_rng(seed=int(snk.params.individual_seed))
+    rng = np.random.default_rng(seed=int(snakemake.params.individual_seed))
 
     individual_id_df = obtain_individual_df(
         ts = ts,
-        ceu_number = int(snk.params.ceu_number),
-        yri_number = int(snk.params.yri_number),
-        chb_number = int(snk.params.chb_number),
-        jpt_number = int(snk.params.jpt_number),
+        ceu_number = int(snakemake.params.ceu_number),
+        yri_number = int(snakemake.params.yri_number),
+        chb_number = int(snakemake.params.chb_number),
+        jpt_number = int(snakemake.params.jpt_number),
         rng = rng
     )
 
-    individual_id_df.to_csv(snk.output.individual_id, index=False)
+    individual_id_df.to_csv(snakemake.output.individual_id, index=False)
 
 if __name__=="__main__":
     main()

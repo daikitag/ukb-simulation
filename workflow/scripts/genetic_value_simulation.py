@@ -2,9 +2,6 @@ import numpy as np
 import pandas as pd
 import tskit
 import tstrait
-import sys
-
-from snakemake.script import snakemake as snk
 
 def obtain_mutation_df(ts, selection_scaling):
     """
@@ -62,25 +59,25 @@ def simulate_genetic_value(ts, mutation_df):
     return genetic_df
 
 def main():
-    ts = tskit.load(snk.input[0])
+    ts = tskit.load(snakemake.input.ts)
 
     mutation_df = sim_tstrait_pleiotropy(
         ts = ts,
-        selection_scaling = float(snk.params.selection_scaling),
-        proportion = float(snk.params.proportion),
-        seed = int(snk.params.genetic_seed),
+        selection_scaling = float(snakemake.params.selection_scaling),
+        proportion = float(snakemake.params.proportion),
+        seed = int(snakemake.params.genetic_seed),
     )
 
     subset_mutation_df = mutation_df.sample(
-        frac=float(snk.params.proportion), replace=False, random_state=int(snk.params.genetic_seed)+1
+        frac=float(snakemake.params.proportion), replace=False, random_state=int(snakemake.params.genetic_seed)+1
     )
     subset_mutation_df = subset_mutation_df.sort_values(by="site_id")
 
-    subset_mutation_df.to_csv(snk.output.mutation_df, index=False)
+    subset_mutation_df.to_csv(snakemake.output.mutation_df, index=False)
 
     genetic_df = tstrait.genetic_value(ts, subset_mutation_df)
 
-    genetic_df.to_csv(snk.output.genetic_df, index=False)
+    genetic_df.to_csv(snakemake.output.genetic_df, index=False)
 
 if __name__ == '__main__':
     main()

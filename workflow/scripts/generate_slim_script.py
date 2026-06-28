@@ -5,8 +5,6 @@ from pathlib import Path
 
 from utils import obtain_msprime_ratemap
 
-from snakemake.script import snakemake as snk
-
 slim_script = """
 initialize() {
 
@@ -130,29 +128,29 @@ def slim_makescript(
     return final_slim_script
 
 def main():
-    chromosome = int(snk.params.chromosome)
-    arm = snk.params.arm
+    chromosome = int(snakemake.params.chromosome)
+    arm = snakemake.params.arm
 
-    seed = int(snk.params.slim_seed)
+    seed = int(snakemake.params.slim_seed)
 
     seed *= chromosome
     seed += 1 if arm == "p" else 0
 
     recombination_map, _ = obtain_msprime_ratemap(
-        recombination_map_file=snk.input.recombination_map_file,
-        position_file=snk.input.position_file,
+        recombination_map_file=snakemake.input.recombination_map_file,
+        position_file=snakemake.input.position_file,
         chromosome=chromosome+arm,
     )
 
     slim_script = slim_makescript(
-        mutation_rate=float(snk.params.mu),
+        mutation_rate=float(snakemake.params.mu),
         recombination_map=recombination_map,
-        demography_file=snk.input.demography,
-        scaling_selection=float(snk.params.selection_scaling),
+        demography_file=snakemake.input.demography,
+        scaling_selection=float(snakemake.params.selection_scaling),
         seed=seed,
     )
 
-    with open(snk.output[0], "w") as f:
+    with open(snakemake.output.slim_script, "w") as f:
         print(slim_script, file=f)
 
 if __name__=="__main__":

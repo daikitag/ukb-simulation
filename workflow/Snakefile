@@ -106,7 +106,7 @@ rule all:
 
 rule generate_slim_script:
     output:
-        f"{folder_pattern}/slim_script.slim",
+        slim_script = f"{folder_pattern}/slim_script.slim",
     input:
         demography = lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
         recombination_map_file=lambda wildcards: get_recombination_map(wildcards.chromosome),
@@ -231,7 +231,7 @@ rule genetic_value_simulation:
         genetic_df = f"{folder_pattern}/genetic_value_{genetic_value_pattern}.csv",
         mutation_df = f"{folder_pattern}/mutation_{genetic_value_pattern}.csv",
     input:
-        f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",
+        ts = f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",
     conda:
         "simulation"
     params:
