@@ -27,7 +27,7 @@ initialize() {
 
     setSeed($seed);
 
-    source("resources/demes-slim/demes.slim");
+    source("demes-slim/demes.slim");
     defineConstant("SCALING_FACTOR", 1.0);
 }
 
