@@ -153,6 +153,8 @@ rule sample_individuals:
         chb_number = lambda wildcards: wildcards.chb,
         jpt_number = lambda wildcards: wildcards.jpt,
         individual_seed=lambda wildcards: wildcards.individual_seed,
+    script:
+        "scripts/sample_individuals.py"
 
 rule recapitate_sample_individuals:
     output:
