@@ -2,6 +2,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
+  - bio2zarr==0.2.1
   - msprime =1.4.2
   - numpy =2.4.6
   - pandas =3.0.3
@@ -10,7 +11,6 @@ dependencies:
   - tskit =1.0.3
   - tstrait =0.1.0
   - tszip =0.3.1
-  - vcztools =0.2.0
   - pip
   - pip:
-    - bio2zarr==0.2.1
+    - vcztools==0.2.0
