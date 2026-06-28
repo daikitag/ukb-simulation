@@ -171,6 +171,7 @@ rule recapitate_sample_individuals:
         f"logs/{folder_pattern}/racapitate_sample_individuals_{sample_tree_seq_pattern}.log"
     params:
         chromosome = lambda wildcards: wildcards.chromosome,
+        arm = lambda wildcards: wildcards.arm,
         recapitate_seed = lambda wildcards: wildcards.recapitate_seed,
     script:
         "scripts/recapitate_sample_individuals.py"
