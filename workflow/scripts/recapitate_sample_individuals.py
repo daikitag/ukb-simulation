@@ -37,7 +37,7 @@ def main():
     recombination_map, left_position = obtain_msprime_ratemap(
         recombination_map_file=snakemake.input.recombination_map_file,
         position_file=snakemake.input.position_file,
-        chromosome=chromosome+arm,
+        chromosome=str(chromosome)+arm,
     )
 
     demography = demes.load(snakemake.input.demography)
