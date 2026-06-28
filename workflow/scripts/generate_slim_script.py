@@ -139,7 +139,7 @@ def main():
     recombination_map, _ = obtain_msprime_ratemap(
         recombination_map_file=snakemake.input.recombination_map_file,
         position_file=snakemake.input.position_file,
-        chromosome=chromosome+arm,
+        chromosome=str(chromosome)+arm,
     )
 
     slim_script = slim_makescript(
