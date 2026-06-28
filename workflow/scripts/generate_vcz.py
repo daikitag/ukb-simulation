@@ -6,6 +6,8 @@ import collections
 import bio2zarr.tskit as ts2z
 import tszip
 
+import sys
+
 def drop_mutations(tables, indexes_of_mutations_to_keep):
     m = len(tables.mutations)
     tables.mutations.parent = np.zeros(m, dtype=np.int32) - 1 # null the parent column
@@ -81,6 +83,8 @@ def subset_tree_seq(ts, selected_individuals):
     return ts.simplify(selected_nodes)
 
 def main():
+    sys.stderr = open(snakemake.log[0], "w", buffering=1)
+
     ts = tszip.load(snakemake.input.ts)
 
     ts = maf_threshold(ts, maf=float(snakemake.params.maf))

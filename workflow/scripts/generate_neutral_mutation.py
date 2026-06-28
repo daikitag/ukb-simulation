@@ -2,19 +2,21 @@ import tskit
 import msprime
 import tszip
 
-from snakemake.script import snakemake as snk
+import sys
 
 def main():
-    ts = tskit.load(snk.input.ts)
+    sys.stderr = open(snakemake.log[0], "w", buffering=1)
+
+    ts = tskit.load(snakemake.input.ts)
 
     ts = msprime.sim_mutations(
         ts,
-        rate=float(snk.params.neutral_mu),
+        rate=float(snakemake.params.neutral_mu),
         keep=True,
-        random_seed=int(snk.params.neutral_seed),
+        random_seed=int(snakemake.params.neutral_seed),
     )
 
-    tszip.compress(ts, snk.output.ts)
+    tszip.compress(ts, snakemake.output.ts)
 
 if __name__ == '__main__':
     main()

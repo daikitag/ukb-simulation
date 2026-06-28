@@ -3,6 +3,8 @@ import pandas as pd
 import tskit
 import tstrait
 
+import sys
+
 def obtain_mutation_df(ts, selection_scaling):
     """
     Obtain mutation dataframe from a tree sequence that is simulated in slim
@@ -59,6 +61,8 @@ def simulate_genetic_value(ts, mutation_df):
     return genetic_df
 
 def main():
+    sys.stderr = open(snakemake.log[0], "w", buffering=1)
+
     ts = tskit.load(snakemake.input.ts)
 
     mutation_df = sim_tstrait_pleiotropy(

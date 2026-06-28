@@ -2,6 +2,8 @@ import tskit
 import numpy as np
 import pandas as pd
 
+import sys
+
 def obtain_population_id(ts):
     population_ids = {}
 
@@ -29,6 +31,8 @@ def obtain_individual_df(ts, yri_number, ceu_number, chb_number, jpt_number, rng
     ])
 
 def main():
+    sys.stderr = open(snakemake.log[0], "w", buffering=1)
+
     ts = tskit.load(snakemake.input.ts)
 
     # Subset tree sequence by individual IDs

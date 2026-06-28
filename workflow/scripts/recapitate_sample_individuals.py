@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pyslim
 
-from snakemake.script import snakemake as snk
+import sys
 
 def subset_tree_seq(ts, selected_individuals):
     selected_nodes = np.array([], dtype=int)
@@ -23,22 +23,24 @@ def convert_allele(ts):
     return ts
 
 def main():
-    ts = tskit.load(snk.input.ts)
+    sys.stderr = open(snakemake.log[0], "w", buffering=1)
 
-    chromosome = int(snk.params.chromosome)
-    arm = snk.params.arm
-    recapitate_seed = int(snk.params.recapitate_seed)
+    ts = tskit.load(snakemake.input.ts)
+
+    chromosome = int(snakemake.params.chromosome)
+    arm = snakemake.params.arm
+    recapitate_seed = int(snakemake.params.recapitate_seed)
 
     recapitate_seed *= chromosome
     recapitate_seed += 1 if arm == "p" else 0
 
     recombination_map, left_position = obtain_msprime_ratemap(
-        recombination_map_file=snk.input.recombination_map_file,
-        position_file=snk.input.position_file,
+        recombination_map_file=snakemake.input.recombination_map_file,
+        position_file=snakemake.input.position_file,
         chromosome=chromosome+arm,
     )
 
-    demography = demes.load(snk.input.demography)
+    demography = demes.load(snakemake.input.demography)
 
     ts = msprime.sim_ancestry(
         initial_state=ts,
@@ -50,13 +52,13 @@ def main():
 
     ts = ts.shift(left_position)
 
-    individual_id_df = pd.read_csv(snk.input.individual_id)
+    individual_id_df = pd.read_csv(snakemake.input.individual_id)
 
     ts = subset_tree_seq(ts, individual_id_df["individual_id"])
 
     ts = convert_allele(ts)
 
-    ts.dump(snk.output.ts)
+    ts.dump(snakemake.output.ts)
 
 if __name__=="__main__":
     main()

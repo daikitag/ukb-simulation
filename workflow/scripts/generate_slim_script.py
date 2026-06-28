@@ -3,6 +3,8 @@ import textwrap
 import demes
 from pathlib import Path
 
+import sys
+
 from utils import obtain_msprime_ratemap
 
 slim_script = """
@@ -128,6 +130,7 @@ def slim_makescript(
     return final_slim_script
 
 def main():
+    sys.stderr = open(snakemake.log[0], "w", buffering=1)
     chromosome = int(snakemake.params.chromosome)
     arm = snakemake.params.arm
 
