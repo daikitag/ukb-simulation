@@ -112,7 +112,7 @@ rule generate_slim_script:
         recombination_map_file=lambda wildcards: get_recombination_map(wildcards.chromosome),
         position_file = RECOMBINATION_POSITION,
     conda:
-        "simulation"
+        "envs/simulation.yaml"
     params:
         arm = lambda wildcards: wildcards.arm,
         chromosome = lambda wildcards: wildcards.chromosome,
@@ -130,7 +130,7 @@ rule slim_underdominance:
     input:
         f"{folder_pattern}/slim_script.slim",
     conda:
-        "simulation"
+        "envs/simulation.yaml"
     resources:
         mem_mb_per_cpu=320000
     log:
@@ -144,7 +144,7 @@ rule sample_individuals:
     input:
         ts = f"{folder_pattern}/slim_allele.tree",
     conda:
-        "simulation"
+        "envs/simulation.yaml"
     log:
         f"logs/{folder_pattern}/sample_individuals_{individual_id_pattern}.log"
     params:
@@ -166,7 +166,7 @@ rule recapitate_sample_individuals:
         recombination_map_file = lambda wildcards: get_recombination_map(wildcards.chromosome),
         position_file = RECOMBINATION_POSITION,
     conda:
-        "simulation"
+        "envs/simulation.yaml"
     log:
         f"logs/{folder_pattern}/racapitate_sample_individuals_{sample_tree_seq_pattern}.log"
     params:
@@ -185,7 +185,7 @@ rule generate_neutral_mutation:
         neutral_mu=lambda wildcards: wildcards.neutral_mu,
         neutral_seed=lambda wildcards: wildcards.neutral_seed,
     conda:
-        "simulation"
+        "envs/simulation.yaml"
     log:
         f"logs/{folder_pattern}/generate_neutral_mutation_{final_ts_pattern}.log"
     script:
@@ -202,7 +202,7 @@ rule generate_vcz:
         maf=lambda wildcards: wildcards.maf,
         chromosome = lambda wildcards: wildcards.chromosome,
     conda:
-        "simulation"
+        "envs/simulation.yaml"
     threads:
         2
     resources:
@@ -221,7 +221,7 @@ rule generate_plink:
     input:
         f"{folder_pattern}/{vcz_pattern}.vcz",
     conda:
-        "simulation"
+        "envs/simulation.yaml"
     params:
         outprefix=lambda wildcards, output: output.bed[:-4]
     log:
@@ -236,7 +236,7 @@ rule genetic_value_simulation:
     input:
         ts = f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",
     conda:
-        "simulation"
+        "envs/simulation.yaml"
     params:
         proportion = lambda wildcards: wildcards.proportion,
         genetic_seed = lambda wildcards: wildcards.genetic_seed,
