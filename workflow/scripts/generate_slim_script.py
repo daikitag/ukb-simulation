@@ -51,7 +51,7 @@ late() {
 
 s1 late() {
     sim.treeSeqSimplify();
-    sim.treeSeqOutput(trees_file);
+    sim.treeSeqOutput(tree_filename);
 }
 """
 
