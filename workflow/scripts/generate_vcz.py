@@ -83,18 +83,7 @@ def subset_tree_seq(ts, selected_individuals):
     return ts.simplify(selected_nodes)
 
 def main():
-    ts = tskit.load(snk.input.ts)
-
-    ts = msprime.sim_mutations(
-        ts,
-        rate=float(snk.params.neutral_mu),
-        keep=True,
-        random_seed=int(snk.params.neutral_seed),
-    )
-
-    ts.dump(snk.output.ts)
-
-    tszip.compress(ts, snk.output.ts)
+    ts = tszip.load(snk.input.ts)
 
     ts = maf_threshold(ts, maf=float(snk.params.maf))
 
@@ -103,13 +92,13 @@ def main():
     model_mapping = ts.map_to_vcf_model(
         individuals=individual_id_df["individual_id"],
         individual_names=individual_id_df["plink_id"],
-        contig_id=str(1),
+        contig_id=str(snk.params.chromosome),
     )
 
     ts2z.convert(
         ts,
         vcz_path=snk.output.vcz,
-        worker_processes=snk.threads,
+        worker_processes=int(snk.threads),
         model_mapping=model_mapping,
     )
 

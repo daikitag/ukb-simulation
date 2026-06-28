@@ -1,0 +1,3 @@
+SyntaxError in file "/mnt/c/Users/daiki/OneDrive/Documents/GitHub/ukb-simulation/workflow/Snakefile", line 120:
+No rule keywords allowed after run/shell/script/notebook/wrapper/template_engine/cwl in rule slim_underdominance.:
+None

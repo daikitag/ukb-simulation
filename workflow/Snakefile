@@ -42,19 +42,16 @@ def get_recombination_map(chromosome):
     )
 
 
-
-basic_pattern_without_chromosome  = (
-    "slim_mu_{mu}_demography_{demography}_slim_seed_{slim_seed}"
-)
 output_pattern = (
-    basic_pattern_without_chromosome + "/chr_{chromosome}{arm}"
+    "slim_mu_{mu}_"
+    "demography_{demography}_"
+    "slim_seed_{slim_seed}_"
+    "chr_{chromosome}{arm}"
 )
+
 # Folder pattern
-folder_pattern_without_chromosome = (
-    "output/" + basic_pattern_without_chromosome
-)
 folder_pattern = (
-    "output/" + output_pattern
+    f"output/{output_pattern}"
 )
 
 # These parameters are used to sample tree sequence and select individual IDs
@@ -63,21 +60,20 @@ individual_id_pattern = (
 )
 # These parameters are used to sample tree sequence, select individual IDs and conduct recapitation
 sample_tree_seq_pattern = (
-    individual_id_pattern +
-    "_recap_seed_{recapitate_seed}"
+    f"{individual_id_pattern}_recap_seed_{{recapitate_seed}}"
 )
 
 final_ts_pattern = (
-    sample_tree_seq_pattern + "_neutralmu_{neutral_mu}_neutralseed_{neutral_seed}"
+    f"{sample_tree_seq_pattern}_neutralmu_{{neutral_mu}}_neutralseed_{{neutral_seed}}"
 )
 
 vcz_pattern = (
-    final_ts_pattern + "_MAF_{maf}"
+    f"{final_ts_pattern}_MAF_{{maf}}"
 )
 
 # These parameters are used to simulate genetic values of individuals
 genetic_value_pattern = (
-    sample_tree_seq_pattern + "_prop_{proportion}_genetic_seed_{genetic_seed}"
+    f"{sample_tree_seq_pattern}_prop_{{proportion}}_genetic_seed_{{genetic_seed}}"
 )
 
 
@@ -123,6 +119,8 @@ rule generate_slim_script:
         mu = lambda wildcards: wildcards.mu,
         selection_scaling=SELECTION_SCALING_PARAMETER,
         slim_seed = lambda wildcards: wildcards.slim_seed,
+    log:
+        f"logs/{folder_pattern}/slim_script.log"
     script:
         "scripts/generate_slim_script.py"
 
@@ -133,44 +131,73 @@ rule slim_underdominance:
         f"{folder_pattern}/slim_script.slim",
     conda:
         "simulation"
-    shell:
-        "slim -d 'tree_filename=\"{output}\"' {input}"
     resources:
         mem_mb_per_cpu=320000
+    log:
+        f"logs/{folder_pattern}/slim_underdominance.log"
+    shell:
+        "slim -d 'tree_filename=\"{output}\"' {input}"
 
-rule recapitate_sample_individuals:
+rule sample_individuals:
     output:
-        ts = f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",
         individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
     input:
         ts = f"{folder_pattern}/slim_allele.tree",
-        demography = lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
-        recombination_map_file = lambda wildcards: get_recombination_map(wildcards.chromosome),
-        position_file = RECOMBINATION_POSITION,
     conda:
         "simulation"
+    log:
+        f"logs/{folder_pattern}/sample_individuals_{individual_id_pattern}.log"
     params:
         yri_number=lambda wildcards: wildcards.yri,
         ceu_number=lambda wildcards: wildcards.ceu,
         chb_number = lambda wildcards: wildcards.chb,
         jpt_number = lambda wildcards: wildcards.jpt,
         individual_seed=lambda wildcards: wildcards.individual_seed,
+
+rule recapitate_sample_individuals:
+    output:
+        ts = f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",    
+    input:
+        ts = f"{folder_pattern}/slim_allele.tree",
+        individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
+        demography = lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
+        recombination_map_file = lambda wildcards: get_recombination_map(wildcards.chromosome),
+        position_file = RECOMBINATION_POSITION,
+    conda:
+        "simulation"
+    log:
+        f"logs/{folder_pattern}/racapitate_sample_individuals_{sample_tree_seq_pattern}.log"
+    params:
         chromosome = lambda wildcards: wildcards.chromosome,
         recapitate_seed = lambda wildcards: wildcards.recapitate_seed,
     script:
         "scripts/recapitate_sample_individuals.py"
 
-rule generate_vcz:
+rule generate_neutral_mutation:
     output:
         ts = f"{folder_pattern}/final_output_{final_ts_pattern}.tree.tsz",
-        vcz = directory(f"{folder_pattern}/{vcz_pattern}.vcz"),
     input:
         ts = f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",
-        individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
     params:
         neutral_mu=lambda wildcards: wildcards.neutral_mu,
         neutral_seed=lambda wildcards: wildcards.neutral_seed,
+    conda:
+        "simulation"
+    log:
+        f"logs/{folder_pattern}/generate_neutral_mutation_{final_ts_pattern}.log"
+    script:
+        "scripts/generate_neutral_mutation.py"
+
+
+rule generate_vcz:
+    output:
+        vcz = directory(f"{folder_pattern}/{vcz_pattern}.vcz"),
+    input:
+        ts = f"{folder_pattern}/final_output_{final_ts_pattern}.tree.tsz",
+        individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
+    params:
         maf=lambda wildcards: wildcards.maf,
+        chromosome = lambda wildcards: wildcards.chromosome,
     conda:
         "simulation"
     threads:
@@ -178,6 +205,8 @@ rule generate_vcz:
     resources:
         cpus_per_task=2,
         mem_mb_per_cpu=160000
+    log:
+        f"logs/{folder_pattern}/generate_vcz_{vcz_pattern}.log"
     script:
         "scripts/generate_vcz.py"
 
@@ -187,11 +216,13 @@ rule generate_plink:
         bim=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.bim",
         fam=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.fam"
     input:
-        directory(f"{folder_pattern}/{vcz_pattern}.vcz"),
+        f"{folder_pattern}/{vcz_pattern}.vcz",
     conda:
         "simulation"
     params:
         outprefix=lambda wildcards, output: output.bed[:-4]
+    log:
+        f"logs/{folder_pattern}/generate_plink_{vcz_pattern}.log"
     shell:
         "vcztools view-plink {input} -M 2 -o {params.outprefix}"
 
@@ -207,6 +238,8 @@ rule genetic_value_simulation:
         proportion = lambda wildcards: wildcards.proportion,
         genetic_seed = lambda wildcards: wildcards.genetic_seed,
         selection_scaling=SELECTION_SCALING_PARAMETER,
+    log:
+        f"logs/{folder_pattern}/genetic_value_simulation_{genetic_value_pattern}.log"
     script:
         "scripts/genetic_value_simulation.py"
 

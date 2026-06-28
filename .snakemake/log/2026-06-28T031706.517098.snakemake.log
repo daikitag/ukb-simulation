@@ -1,0 +1,80 @@
+The flag 'directory' used in rule generate_plink is only valid for outputs, not inputs.
+Lints for snakefile /mnt/c/Users/daiki/OneDrive/Documents/GitHub/ukb-simulation/workflow/Snakefile:
+    * Absolute path "/chr_{chromosome}{arm}" in line 50:
+      Do not define absolute paths inside of the workflow, since this renders your workflow irreproducible on other
+      machines. Use path relative to the working directory instead, or make the path configurable via a config file.
+      Also see:
+      https://snakemake.readthedocs.io/en/latest/snakefiles/configuration.html#configuration
+    * Path composition with '+' in line 50:
+      This becomes quickly unreadable. Usually, it is better to endure some redundancy against having a more readable
+      workflow. Hence, just repeat common prefixes. If path composition is unavoidable, use pathlib or (python >= 3.6)
+      string formatting with f"...".
+    * Path composition with '+' in line 71:
+      This becomes quickly unreadable. Usually, it is better to endure some redundancy against having a more readable
+      workflow. Hence, just repeat common prefixes. If path composition is unavoidable, use pathlib or (python >= 3.6)
+      string formatting with f"...".
+    * Path composition with '+' in line 1:
+      This becomes quickly unreadable. Usually, it is better to endure some redundancy against having a more readable
+      workflow. Hence, just repeat common prefixes. If path composition is unavoidable, use pathlib or (python >= 3.6)
+      string formatting with f"...".
+    * Path composition with '+' in line 57:
+      This becomes quickly unreadable. Usually, it is better to endure some redundancy against having a more readable
+      workflow. Hence, just repeat common prefixes. If path composition is unavoidable, use pathlib or (python >= 3.6)
+      string formatting with f"...".
+
+Lints for rule generate_slim_script (line 111, /mnt/c/Users/daiki/OneDrive/Documents/GitHub/ukb-simulation/workflow/Snakefile):
+    * No log directive defined:
+      Without a log directive, all output will be printed to the terminal. In distributed environments, this means that
+      errors are harder to discover. In local environments, output of concurrent jobs will be mixed and become
+      unreadable.
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files
+
+Lints for rule slim_underdominance (line 129, /mnt/c/Users/daiki/OneDrive/Documents/GitHub/ukb-simulation/workflow/Snakefile):
+    * No log directive defined:
+      Without a log directive, all output will be printed to the terminal. In distributed environments, this means that
+      errors are harder to discover. In local environments, output of concurrent jobs will be mixed and become
+      unreadable.
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files
+
+Lints for rule recapitate_sample_individuals (line 155, /mnt/c/Users/daiki/OneDrive/Documents/GitHub/ukb-simulation/workflow/Snakefile):
+    * No log directive defined:
+      Without a log directive, all output will be printed to the terminal. In distributed environments, this means that
+      errors are harder to discover. In local environments, output of concurrent jobs will be mixed and become
+      unreadable.
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files
+
+Lints for rule generate_neutral_mutation (line 172, /mnt/c/Users/daiki/OneDrive/Documents/GitHub/ukb-simulation/workflow/Snakefile):
+    * No log directive defined:
+      Without a log directive, all output will be printed to the terminal. In distributed environments, this means that
+      errors are harder to discover. In local environments, output of concurrent jobs will be mixed and become
+      unreadable.
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files
+
+Lints for rule generate_vcz (line 186, /mnt/c/Users/daiki/OneDrive/Documents/GitHub/ukb-simulation/workflow/Snakefile):
+    * No log directive defined:
+      Without a log directive, all output will be printed to the terminal. In distributed environments, this means that
+      errors are harder to discover. In local environments, output of concurrent jobs will be mixed and become
+      unreadable.
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files
+
+Lints for rule generate_plink (line 205, /mnt/c/Users/daiki/OneDrive/Documents/GitHub/ukb-simulation/workflow/Snakefile):
+    * No log directive defined:
+      Without a log directive, all output will be printed to the terminal. In distributed environments, this means that
+      errors are harder to discover. In local environments, output of concurrent jobs will be mixed and become
+      unreadable.
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files
+
+Lints for rule genetic_value_simulation (line 219, /mnt/c/Users/daiki/OneDrive/Documents/GitHub/ukb-simulation/workflow/Snakefile):
+    * No log directive defined:
+      Without a log directive, all output will be printed to the terminal. In distributed environments, this means that
+      errors are harder to discover. In local environments, output of concurrent jobs will be mixed and become
+      unreadable.
+      Also see:
+      https://snakemake.readthedocs.io/en/stable/snakefiles/rules.html#log-files
+
