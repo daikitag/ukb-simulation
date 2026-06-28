@@ -40,7 +40,9 @@ def main():
         chromosome=str(chromosome)+arm,
     )
 
-    demography = demes.load(snakemake.input.demography)
+    graph = demes.load(snakemake.input.demography)
+
+    demography = msprime.Demography.from_demes(graph)
 
     ts = msprime.sim_ancestry(
         initial_state=ts,
