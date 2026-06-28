@@ -68,7 +68,6 @@ def main():
     mutation_df = sim_tstrait_pleiotropy(
         ts = ts,
         selection_scaling = float(snakemake.params.selection_scaling),
-        proportion = float(snakemake.params.proportion),
         seed = int(snakemake.params.genetic_seed),
     )
 
