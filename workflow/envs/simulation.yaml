@@ -15,5 +15,5 @@ dependencies:
   - tszip=0.3.1
   - pip
   - pip:
-    - vcztools=0.2.0
+    - vcztools==0.2.0
       
