@@ -8,10 +8,13 @@ import pyslim
 
 import sys
 
+
 def subset_tree_seq(ts, selected_individuals):
     selected_nodes = np.array([], dtype=int)
     for individual in selected_individuals:
-        selected_nodes = np.concatenate((selected_nodes, ts.individual(individual).nodes))
+        selected_nodes = np.concatenate(
+            (selected_nodes, ts.individual(individual).nodes)
+        )
 
     return ts.simplify(selected_nodes, filter_individuals=False)
 
@@ -21,6 +24,7 @@ def convert_allele(ts):
     ts = pyslim.convert_alleles(ts)
 
     return ts
+
 
 def main():
     sys.stderr = open(snakemake.log[0], "w", buffering=1)
@@ -37,7 +41,7 @@ def main():
     recombination_map, left_position = obtain_msprime_ratemap(
         recombination_map_file=snakemake.input.recombination_map_file,
         position_file=snakemake.input.position_file,
-        chromosome=str(chromosome)+arm,
+        chromosome=str(chromosome) + arm,
     )
 
     graph = demes.load(snakemake.input.demography)
@@ -62,5 +66,6 @@ def main():
 
     ts.dump(snakemake.output.ts)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()

@@ -4,6 +4,7 @@ import tszip
 
 import sys
 
+
 def main():
     sys.stderr = open(snakemake.log[0], "w", buffering=1)
 
@@ -18,5 +19,6 @@ def main():
 
     tszip.compress(ts, snakemake.output.ts)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

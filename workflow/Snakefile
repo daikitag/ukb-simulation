@@ -34,13 +34,8 @@ PROPORTION = config["proportion"]
 GENETIC_SEED = config["genetic_seed"]
 
 # Recombination map directory
-# Modify this function if you would ike to modify the location of recombination map
-def get_recombination_map(chromosome):
-    return (
-        f"resources/recombination_map/HapMapII_GRCh38/"
-        f"genetic_map_Hg38_chr{chromosome}.txt"
-    )
-
+# Modify this string if you would ike to modify the location of recombination map
+get_recombination_map = "resources/recombination_map/HapMapII_GRCh38/genetic_map_Hg38_chr{chromosome}.txt"
 
 output_pattern = (
     "slim_mu_{mu}_"
@@ -109,7 +104,7 @@ rule generate_slim_script:
         slim_script = f"{folder_pattern}/slim_script.slim",
     input:
         demography = lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
-        recombination_map_file=lambda wildcards: get_recombination_map(wildcards.chromosome),
+        recombination_map_file=lambda wildcards: get_recombination_map.format(chromosome = wildcards.chromosome),
         position_file = RECOMBINATION_POSITION,
     conda:
         "envs/simulation.yaml"
@@ -163,7 +158,7 @@ rule recapitate_sample_individuals:
         ts = f"{folder_pattern}/slim_allele.tree",
         individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
         demography = lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
-        recombination_map_file = lambda wildcards: get_recombination_map(wildcards.chromosome),
+        recombination_map_file = lambda wildcards: get_recombination_map.format(chromsome = wildcards.chromosome),
         position_file = RECOMBINATION_POSITION,
     conda:
         "envs/simulation.yaml"

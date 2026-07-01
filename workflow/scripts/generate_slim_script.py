@@ -46,8 +46,8 @@ early() {
 }
 
 late() {
-    if ((community.tick >= (sim_end - 42)) &
-        ((community.tick - (sim_end - 42)) % 5 == 0))
+    if ((community.tick >= (sim_end - 52)) &
+        ((community.tick - (sim_end - 52)) % 3 == 0))
         sim.treeSeqSimplify();
 }
 
@@ -56,6 +56,7 @@ s1 late() {
     sim.treeSeqOutput(tree_filename);
 }
 """
+
 
 def slim_array_string(iterable, indent, width=80):
     """
@@ -102,9 +103,9 @@ def msprime_rm_to_slim_rm(recombination_map):
     ends = [int(pos) - 1 for pos in recombination_map.position]
     return rates, ends[1:]
 
+
 def slim_makescript(
-    mutation_rate, recombination_map, demography_file,
-    scaling_selection, seed
+    mutation_rate, recombination_map, demography_file, scaling_selection, seed
 ):
     recomb_rates, recomb_ends = msprime_rm_to_slim_rm(recombination_map)
     indent = 8 * " "
@@ -114,9 +115,11 @@ def slim_makescript(
     demography = demes.load(demography_file)
     demography_file_path = Path(demography_file)
     json_demography_file = demography_file_path.with_suffix(".json")
-    demes.dump(demography, filename=json_demography_file, format="json", simplified=False)
+    demes.dump(
+        demography, filename=json_demography_file, format="json", simplified=False
+    )
 
-    final_slim_script =  string.Template(slim_script).substitute(
+    final_slim_script = string.Template(slim_script).substitute(
         recombination_rates=recomb_rates_str,
         recombination_ends=recomb_ends_str,
         element_starts=0,
@@ -128,6 +131,7 @@ def slim_makescript(
     )
 
     return final_slim_script
+
 
 def main():
     sys.stderr = open(snakemake.log[0], "w", buffering=1)
@@ -142,7 +146,7 @@ def main():
     recombination_map, _ = obtain_msprime_ratemap(
         recombination_map_file=snakemake.input.recombination_map_file,
         position_file=snakemake.input.position_file,
-        chromosome=str(chromosome)+arm,
+        chromosome=str(chromosome) + arm,
     )
 
     slim_script = slim_makescript(
@@ -156,5 +160,6 @@ def main():
     with open(snakemake.output.slim_script, "w") as f:
         print(slim_script, file=f)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     main()

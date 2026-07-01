@@ -5,6 +5,7 @@ import tstrait
 
 import sys
 
+
 def obtain_mutation_df(ts, selection_scaling):
     """Obtain mutation dataframe.
 
@@ -53,16 +54,21 @@ def obtain_mutation_df(ts, selection_scaling):
             {
                 "site_id": ts.site(mutation.site).id,
                 "site_position": ts.site(mutation.site).position,
-                "selection_coeff": mutation.metadata["mutation_list"][0]["selection_coeff"],
+                "selection_coeff": mutation.metadata["mutation_list"][0][
+                    "selection_coeff"
+                ],
                 "causal_allele": mutation.derived_state,
                 "trait_id": 0,
             }
         )
 
     mutation_df = pd.DataFrame(mutation_list)
-    mutation_df["selection_coeff"] = mutation_df["selection_coeff"]*selection_scaling*(-2)
+    mutation_df["selection_coeff"] = (
+        mutation_df["selection_coeff"] * selection_scaling * (-2)
+    )
 
     return mutation_df
+
 
 def sim_tstrait_pleiotropy(ts, selection_scaling, proportion, seed):
     """Obtain mutation dataframe with simulated effect sizes and take a subset of them.
@@ -94,7 +100,7 @@ def sim_tstrait_pleiotropy(ts, selection_scaling, proportion, seed):
     mutations, (2) simulating effect sizes by using the selection coefficient of
     each mutation, (3) taking a subset of that mutation dataframe, and (4)
     compuate genetic value of individuals by using the mutation dataframe.
-    
+
     In step (1), :func:`obtain_mutation_df` function is used to obtain a mutation
     dataframe by extracting information regarding how mutation dataframe is obtained
     from the input tree sequence data.
@@ -140,13 +146,15 @@ def sim_tstrait_pleiotropy(ts, selection_scaling, proportion, seed):
     """
     rng = np.random.default_rng(seed=seed)
     mutation_df = obtain_mutation_df(ts, selection_scaling)
-    mutation_df["effect_size"] = mutation_df.apply(lambda row: rng.normal(loc = 0, scale = np.sqrt(row["selection_coeff"])), axis=1)
+    mutation_df["effect_size"] = mutation_df.apply(
+        lambda row: rng.normal(loc=0, scale=np.sqrt(row["selection_coeff"])), axis=1
+    )
 
     if proportion > 1:
         raise ValueError("Proportion must not be greater than 1.")
 
     subset_mutation_df = mutation_df.sample(
-        frac=proportion, replace=False, random_state=seed+1
+        frac=proportion, replace=False, random_state=seed + 1
     )
     subset_mutation_df = subset_mutation_df.sort_values(by="site_id")
 
@@ -169,15 +177,16 @@ def main():
     ts = tskit.load(snakemake.input.ts)
 
     subset_mutation_df, genetic_df = sim_tstrait_pleiotropy(
-        ts = ts,
-        selection_scaling = float(snakemake.params.selection_scaling),
-        seed = int(snakemake.params.genetic_seed),
-        proportion = float(snakemake.params.proportion),
+        ts=ts,
+        selection_scaling=float(snakemake.params.selection_scaling),
+        seed=int(snakemake.params.genetic_seed),
+        proportion=float(snakemake.params.proportion),
     )
 
     subset_mutation_df.to_csv(snakemake.output.mutation_df, index=False)
 
     genetic_df.to_csv(snakemake.output.genetic_df, index=False)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
