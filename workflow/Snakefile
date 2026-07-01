@@ -158,7 +158,7 @@ rule recapitate_sample_individuals:
         ts = f"{folder_pattern}/slim_allele.tree",
         individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
         demography = lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
-        recombination_map_file = lambda wildcards: get_recombination_map.format(chromsome = wildcards.chromosome),
+        recombination_map_file = lambda wildcards: get_recombination_map.format(chromosome = wildcards.chromosome),
         position_file = RECOMBINATION_POSITION,
     conda:
         "envs/simulation.yaml"
