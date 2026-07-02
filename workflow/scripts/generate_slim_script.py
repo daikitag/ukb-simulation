@@ -46,8 +46,8 @@ early() {
 }
 
 late() {
-    if ((community.tick >= (sim_end - 52)) &
-        ((community.tick - (sim_end - 52)) % 3 == 0))
+    if ((community.tick >= (sim_end - 185)) &
+        ((community.tick - (sim_end - 185)) % 5 == 0))
         sim.treeSeqSimplify();
 }
 
@@ -104,9 +104,7 @@ def msprime_rm_to_slim_rm(recombination_map):
     return rates, ends[1:]
 
 
-def slim_makescript(
-    mutation_rate, recombination_map, demography_file, scaling_selection, seed
-):
+def slim_makescript(mutation_rate, recombination_map, demography_file, scaling_selection, seed):
     recomb_rates, recomb_ends = msprime_rm_to_slim_rm(recombination_map)
     indent = 8 * " "
     recomb_rates_str = slim_array_string(recomb_rates, indent)
@@ -115,9 +113,7 @@ def slim_makescript(
     demography = demes.load(demography_file)
     demography_file_path = Path(demography_file)
     json_demography_file = demography_file_path.with_suffix(".json")
-    demes.dump(
-        demography, filename=json_demography_file, format="json", simplified=False
-    )
+    demes.dump(demography, filename=json_demography_file, format="json", simplified=False)
 
     final_slim_script = string.Template(slim_script).substitute(
         recombination_rates=recomb_rates_str,
