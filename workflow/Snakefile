@@ -131,7 +131,7 @@ rule slim_underdominance:
     log:
         f"logs/{folder_pattern}/slim_underdominance.log"
     shell:
-        "slim -d 'tree_filename=\"{output}\"' {input}"
+        "slim -d 'tree_filename=\"{output}\"' {input} > {log}"
 
 rule sample_individuals:
     output:

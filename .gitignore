@@ -1,1 +1,3 @@
 .snakemake
+resources/recombination_map/HapMapII_GRCh38/*
+resources/recombination_map/*.gz
