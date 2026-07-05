@@ -11,6 +11,6 @@ jobs:
       - name: Linting
         uses: snakemake/snakemake-github-action@v2
         with:
-          directory: ".test"
+          directory: ".tests"
           snakefile: "workflow/Snakefile"
           args: "--lint"
