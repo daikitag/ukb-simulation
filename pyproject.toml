@@ -1,0 +1,10 @@
+[project]
+name = "ukb-simulation"
+description = "Snakemake pipeline for conducting UKB simulation"
+
+[tool.ruff]
+builtins = ["snakemake"]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "W", "I", "N", "UP", "A", "PT"]

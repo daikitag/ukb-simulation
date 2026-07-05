@@ -1,10 +1,9 @@
 import string
+import sys
 import textwrap
-import demes
 from pathlib import Path
 
-import sys
-
+import demes
 from utils import obtain_msprime_ratemap
 
 slim_script = """
@@ -18,7 +17,7 @@ initialize() {
     defineConstant("simulated_s", df.getValue('simulated_s'));
     scriptForQTLs = "-0.5 * sample(simulated_s, 1) / scaling_selection;";
     initializeMutationType("m1", scaling_selection, "s", scriptForQTLs);
-    
+
     defineConstant("recombination_rates", $recombination_rates);
     defineConstant("recombination_ends", $recombination_ends);
     initializeRecombinationRate(recombination_rates, recombination_ends);
@@ -104,7 +103,9 @@ def msprime_rm_to_slim_rm(recombination_map):
     return rates, ends[1:]
 
 
-def slim_makescript(mutation_rate, recombination_map, demography_file, scaling_selection, seed):
+def slim_makescript(
+    mutation_rate, recombination_map, demography_file, scaling_selection, seed
+):
     recomb_rates, recomb_ends = msprime_rm_to_slim_rm(recombination_map)
     indent = 8 * " "
     recomb_rates_str = slim_array_string(recomb_rates, indent)
@@ -113,7 +114,9 @@ def slim_makescript(mutation_rate, recombination_map, demography_file, scaling_s
     demography = demes.load(demography_file)
     demography_file_path = Path(demography_file)
     json_demography_file = demography_file_path.with_suffix(".json")
-    demes.dump(demography, filename=json_demography_file, format="json", simplified=False)
+    demes.dump(
+        demography, filename=json_demography_file, format="json", simplified=False
+    )
 
     final_slim_script = string.Template(slim_script).substitute(
         recombination_rates=recomb_rates_str,

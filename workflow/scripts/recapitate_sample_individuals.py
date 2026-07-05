@@ -1,12 +1,12 @@
-from utils import obtain_msprime_ratemap
-import tskit
+import sys
+
 import demes
 import msprime
 import numpy as np
 import pandas as pd
 import pyslim
-
-import sys
+import tskit
+from utils import obtain_msprime_ratemap
 
 
 def subset_tree_seq(ts, selected_individuals):

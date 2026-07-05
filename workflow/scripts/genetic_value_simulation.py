@@ -1,9 +1,9 @@
+import sys
+
 import numpy as np
 import pandas as pd
 import tskit
 import tstrait
-
-import sys
 
 
 def obtain_mutation_df(ts, selection_scaling):
@@ -31,7 +31,8 @@ def obtain_mutation_df(ts, selection_scaling):
     information regarding selection coefficient and causal allele. Neutral mutations
     are not required. Be sure to input tree sequence data that has the alleles in the
     desired format (i.e., nucleotides and not SLiM allele if the final output uses
-    nucleotides), as the alleles inside this dataframe will be matched to the final output.
+    nucleotides), as the alleles inside this dataframe will be matched to the final
+    output.
 
     The output mutation dataframe includes the following columns. These information are
     extracted for all mutations in the input tree sequence data:
@@ -117,8 +118,8 @@ def sim_tstrait_pleiotropy(ts, selection_scaling, proportion, seed):
     the trait. Random sampling without replacement is used to extract a proportion of
     the resulting mutation dataframe.
 
-    In step (4), :func:`tstrait.genetic_value` is used to compute the genetic values of all
-    individuals in the input tree sequence data.
+    In step (4), :func:`tstrait.genetic_value` is used to compute the genetic values of
+    all individuals in the input tree sequence data.
 
     The input seed is directly used to simulate effect sizes, but a seed of
     `seed + 1` is used to take a subset of the mutation dataframe.
@@ -126,8 +127,8 @@ def sim_tstrait_pleiotropy(ts, selection_scaling, proportion, seed):
     The output mutation dataframe includes the following columns. Once these information
     are extracted for all mutations, a subset of them are selected in the final output.
     This mutation dataframe is ordered by `site_id`, as it is a requirement in `tstrait`
-    genetic value computation. This mutation dataframe is used to compute the genetic value
-    of individuals.
+    genetic value computation. This mutation dataframe is used to compute the genetic
+    value of individuals.
 
     - `site_id`: Site ID from the tree sequence data.
     - `site_position`: Location of the mutation in the input tree sequence data.
@@ -141,8 +142,9 @@ def sim_tstrait_pleiotropy(ts, selection_scaling, proportion, seed):
     - `effect_size`: Simulated effect size.
 
     The genetic value dataframe is simply obtained by using
-    :func:`tstrait.genetic_value` function. Please refer to the :func:`tstrait.genetic_value`
-    documentation to find out the details of the output dataframe.
+    :func:`tstrait.genetic_value` function. Please refer to the
+    :func:`tstrait.genetic_value` documentation to find out the details of the output
+    dataframe.
     """
     rng = np.random.default_rng(seed=seed)
     mutation_df = obtain_mutation_df(ts, selection_scaling)

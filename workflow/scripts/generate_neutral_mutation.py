@@ -1,8 +1,8 @@
-import tskit
-import msprime
-import tszip
-
 import sys
+
+import msprime
+import tskit
+import tszip
 
 
 def main():

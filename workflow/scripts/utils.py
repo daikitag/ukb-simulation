@@ -1,5 +1,5 @@
-import pandas as pd
 import msprime
+import pandas as pd
 
 
 def obtain_msprime_ratemap(recombination_map_file, position_file, chromosome):

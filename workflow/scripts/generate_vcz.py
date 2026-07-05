@@ -1,12 +1,11 @@
-import tskit
-import pandas as pd
-import msprime
-import numpy as np
 import collections
-import bio2zarr.tskit as ts2z
-import tszip
-
 import sys
+
+import bio2zarr.tskit as ts2z
+import numpy as np
+import pandas as pd
+import tskit
+import tszip
 
 
 def drop_mutations(tables, indexes_of_mutations_to_keep):

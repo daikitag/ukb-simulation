@@ -1,8 +1,8 @@
-import tskit
+import sys
+
 import numpy as np
 import pandas as pd
-
-import sys
+import tskit
 
 
 def obtain_population_id(ts):
