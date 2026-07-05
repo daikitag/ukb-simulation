@@ -1,3 +1,6 @@
+[![Lint](https://github.com/daikitag/ukb-simulation/actions/workflows/lint.yaml/badge.svg)](https://github.com/daikitag/ukb-simulation/actions/workflows/lint.yaml)
+[![Snakemake](https://github.com/daikitag/ukb-simulation/actions/workflows/snakemake.yaml/badge.svg)](https://github.com/daikitag/ukb-simulation/actions/workflows/snakemake.yaml)
+
 # snakemake-quantitative-trait-simulation
 
 This snakemake workflow is used to conduct the following simulations:
