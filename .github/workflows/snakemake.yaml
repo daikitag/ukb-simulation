@@ -13,3 +13,4 @@ jobs:
         with:
           directory: ".test"
           snakefile: "workflow/Snakefile"
+          args: "--lint"
