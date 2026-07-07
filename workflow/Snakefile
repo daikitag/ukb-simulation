@@ -145,7 +145,7 @@ rule slim_underdominance:
     conda:
         "envs/simulation.yaml"
     resources:
-        mem_mb_per_cpu=320000,
+        mem_mb=320000,
     shell:
         "slim -d 'tree_filename=\"{output}\"' {input} > {log}"
 

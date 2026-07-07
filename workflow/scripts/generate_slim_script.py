@@ -45,8 +45,8 @@ early() {
 }
 
 late() {
-    if ((community.tick >= (sim_end - 185)) &
-        ((community.tick - (sim_end - 185)) % 5 == 0))
+    if ((community.tick >= (sim_end - 42)) &
+        ((community.tick - (sim_end - 42)) % 5 == 0))
         sim.treeSeqSimplify();
 }
 
