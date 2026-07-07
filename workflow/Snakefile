@@ -221,7 +221,7 @@ rule generate_vcz:
     threads: 2
     resources:
         cpus_per_task=2,
-        mem_mb_per_cpu=160000,
+        mem_mb=320000,
     params:
         maf=lambda wildcards: wildcards.maf,
         chromosome=lambda wildcards: wildcards.chromosome,
