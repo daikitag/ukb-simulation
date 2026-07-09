@@ -17,4 +17,3 @@ The simulation parameters are specified in `config.yaml` in `config` directory.
 Please install the following packages to run snakemake on slurm:
 - snakemake
 - snakemake-executor-plugin-slurm
-

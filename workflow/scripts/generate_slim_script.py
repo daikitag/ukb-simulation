@@ -6,6 +6,40 @@ from pathlib import Path
 import demes
 from utils import obtain_msprime_ratemap
 
+"""A brief explanation to the SLiM script below:
+
+This SLiM script conducts a forward-time simulation where individuals are subject to
+underdominant selection model. The selection coefficient of each mutation is randomly
+selected from an input csv file with simulated values of s from Simons et al. (2025).
+
+For this mutation model, a mutation has a selection coefficient of
+-0.5 * `s` / `scaling_selection`, and a dominance coefficient of `scaling_selection`.
+In SLiM, the relative fitness of an individual is modeled as
+1, 1 + selection coefficient * dominance coefficient, and 1 + selection coefficient.
+In an underdominant selection model, we are interested in modeling individual's fitness
+as 1, 1 + selection_coefficient / 2, and 1. While it would be possible for us to
+directly use this in SLiM simulation, the computational speed of SLiM simulation would
+be the fastest when we simply model an individual's fitness by using the mutation's
+selection coefficient and dominance coefficient. We can accomplish this selection
+model by setting the `scaling_selection` parameter as a really small number.
+
+The biggest limitation of running SLiM for a biobank-scale sample size is the required
+RAM. The required RAM only gets extremely large at the final generations when we have
+an explosive growth. To reduce the RAM, we implement two things: (1) setting the
+mutation rate as 0 in the final generations, and (2) manually ask SLiM to run
+simplication every five generations in the final 42 generations. Running simplification
+in SLiM can result in reduced memory, but with a cost of increased computational time.
+So we use SLiM's automatic simplification for the majority of generations and only run
+repeated simplication at the final generations.
+
+The output file name (tree_filename) is intentionally left as an undefined variable.
+This will be defined in the snakemake pipeline.
+
+Demes-slim is used to load the demography file into SLiM.
+
+The below script is written as a template string so that we can input an arbitrary
+number for each of these variables.
+"""
 slim_script = """
 initialize() {
 
@@ -104,8 +138,39 @@ def msprime_rm_to_slim_rm(recombination_map):
 
 
 def slim_makescript(
-    mutation_rate, recombination_map, demography_file, scaling_selection, seed
+    mutation_rate,
+    recombination_map,
+    demography_file,
+    scaling_selection,
+    seed,
+    slim_script=slim_script,
 ):
+    """Generate SLiM script.
+
+    This function uses the input template string of the SLiM script and substitutes
+    the input varibles to generate the final SLiM script that can be used in SLiM
+    simulation.
+
+    Parameters
+    ----------
+    mutation_rate : float
+        Mutation rate per base per generation.
+    recombination_map : msprime.RateMap
+        Recombination map in msprime's structure.
+    demography_file : str
+        File path to demes demography YAML file.
+    selection_scaling : float
+        Selection scaling parameter in SLiM simulation.
+    seed : int
+        Seed that will be used in SLiM simulation.
+    slim_script : str
+        A template string of SLiM script.
+
+    Returns
+    -------
+    final_slim_script : str
+        SLiM script that can be used in SLiM simulation.
+    """
     recomb_rates, recomb_ends = msprime_rm_to_slim_rm(recombination_map)
     indent = 8 * " "
     recomb_rates_str = slim_array_string(recomb_rates, indent)
@@ -133,12 +198,25 @@ def slim_makescript(
 
 
 def main():
+    """Generates SLiM script.
+
+    This function generates a SLiM script that can be used in conducting SLiM
+    simulation. A template string is used to describe the initial SLiM script, as we
+    would like to use custom Python functions to input the recombination map in a
+    correct format to SLiM. The final SLiM script can be directly used in SLiM, so it
+    is saved for later usage.
+
+    The function to load the recombination map into msprime and convert it to SLiM
+    format is adapted from the simulation pipeline in `stdpopsim`.
+    """
     sys.stderr = open(snakemake.log[0], "w", buffering=1)
     chromosome = int(snakemake.params.chromosome)
     arm = snakemake.params.arm
 
     seed = int(snakemake.params.slim_seed)
 
+    # This is used to set the seed for each chromosome and arm as a different
+    # interger
     seed *= chromosome
     seed += 1 if arm == "p" else 0
 

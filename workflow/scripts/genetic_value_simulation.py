@@ -152,8 +152,8 @@ def sim_tstrait_pleiotropy(ts, selection_scaling, proportion, seed):
         lambda row: rng.normal(loc=0, scale=np.sqrt(row["selection_coeff"])), axis=1
     )
 
-    if proportion > 1:
-        raise ValueError("Proportion must not be greater than 1.")
+    if not (0 <= proportion <= 1):
+        raise ValueError("Proportion must be between 0 and 1.")
 
     subset_mutation_df = mutation_df.sample(
         frac=proportion, replace=False, random_state=seed + 1

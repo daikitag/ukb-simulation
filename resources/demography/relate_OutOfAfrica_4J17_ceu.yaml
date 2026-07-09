@@ -38,7 +38,7 @@ demes:
   epochs:
   - {end_time: 185, start_size: 5050, end_size: 34678}
   - {end_time: 0, start_size: 50000}
-  
+
 migrations:
 - demes: [YRI, CEU]
   rate: 0.000148

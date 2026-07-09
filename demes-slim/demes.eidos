@@ -281,7 +281,7 @@ function (integer$)to_slim_units(
             time = g_burn_end + t_max - iround(time / scaling_factor);
             pulse.setValue("time", time);
 
-            // TODO: Check that the scaled pulse time makes sense w.r.t. the 
+            // TODO: Check that the scaled pulse time makes sense w.r.t. the
             //       scaled source and dest start/end times.
         }
     }
