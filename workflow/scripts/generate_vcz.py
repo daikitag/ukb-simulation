@@ -9,15 +9,35 @@ import tszip
 
 
 def drop_mutations(tables, indexes_of_mutations_to_keep):
+    """Drop mutations from mutation table.
+
+    This function directly modifies the table collection from a tree sequence data and
+    only keeps the IDs of mutations that are specified in
+    `indexes_of_mutations_to_keep`. All other mutations are removed from the table
+    collection.
+
+    Parameters
+    ----------
+    tables : tskit.TableCollection
+        Table collection from a tree sequence data.
+    indexes_of_mutations_to_keep : list
+        List of mutation IDs to keep in the tree sequence data.
+    """
     m = len(tables.mutations)
     tables.mutations.parent = np.zeros(m, dtype=np.int32) - 1  # null the parent column
-    select = np.zeros(m, dtype=np.bool)
+    select = np.zeros(m, dtype=bool)
     select[indexes_of_mutations_to_keep] = True
     tables.mutations.keep_rows(select)
     tables.compute_mutation_parents()
 
 
 def common_mutation_id(site, state):
+    """Obtain mutation IDs with a certain state.
+
+    The input of this function is a site from a tree sequence data and a state from
+    that site. The output of this function is a list of all mutation IDs with the
+    derived state equal to `state`.
+    """
     mutation_list = []
     for m in site.mutations:
         if m.derived_state in state:
@@ -25,15 +45,10 @@ def common_mutation_id(site, state):
     return mutation_list
 
 
-def _get_next_id(ts):
-    max_id = -1
-    for mut in ts.mutations():
-        for d in mut.derived_state.split(","):
-            max_id = max(max_id, int(d))
-    return max_id + 1
-
-
 def count_site_alleles(ts, tree, site):
+    """Obtain collections Counter object of ancestral state and number of samples
+    from the input site.
+    """
     counts = collections.Counter({site.ancestral_state: ts.num_samples})
     for m in site.mutations:
         current_state = site.ancestral_state
@@ -48,6 +63,31 @@ def count_site_alleles(ts, tree, site):
 
 
 def maf_threshold(ts, maf):
+    """Subset tree sequence based on MAF.
+
+    This function removes all sites where the MAF is less than `maf`.
+
+    Parameters
+    ----------
+    ts : tskit.TreeSequence
+        Input tree sequence data.
+    maf : float
+        MAF threshold.
+
+    Returns
+    -------
+    down_sample_ts : tskit.TreeSequence
+        Tree sequence data where the MAF of all mutations in the data will be above
+        `maf`.
+
+    Notes
+    -----
+    For multiallelic sites, this function only retains the mutation where the derived
+    state is the major allele or the second most common allele. All other mutations
+    from the site will be removed, so all sites will only have two alleles, the derived
+    state from the retained mutation and the ancestral state. This is to ensure that
+    the output tree sequence data is biallelic.
+    """
     remove_site = []
     keep_mutation = []
 
@@ -66,6 +106,8 @@ def maf_threshold(ts, maf):
             remove_site.append(i)
         # multiallelic site
         elif len(counts) > 2:
+            # This line is necessary, as an ancestral state can be the third most
+            # common allele.
             del counts[site.ancestral_state]
             mutation_index = common_mutation_id(
                 site, state=[counts.most_common(1)[0][0], site.ancestral_state]
@@ -82,17 +124,17 @@ def maf_threshold(ts, maf):
     return down_sample_ts
 
 
-def subset_tree_seq(ts, selected_individuals):
-    selected_nodes = np.array([], dtype=int)
-    for individual in selected_individuals:
-        selected_nodes = np.concatenate(
-            (selected_nodes, ts.individual(individual).nodes)
-        )
-
-    return ts.simplify(selected_nodes)
-
-
 def main():
+    """Generates VCZ.
+
+    This function first subsets the input tree sequence data based on MAF and processes
+    multi-allelic sites, such that all sites in the tree sequence data are biallelic.
+    This is to make sure that no errors are raised when generating PLINK files from
+    VCZ.
+
+    The `plink_id` column in individual ID dataframe is used as individual names in
+    VCZ, and it will be also be used in PLINK files.
+    """
     sys.stderr = open(snakemake.log[0], "w", buffering=1)
 
     ts = tszip.load(snakemake.input.ts)

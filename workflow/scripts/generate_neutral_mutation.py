@@ -6,6 +6,12 @@ import tszip
 
 
 def main():
+    """Add neutral mutations.
+
+    The input tree sequence data for this script does not have neutral mutations, as it
+    is generated in SLiM. This script simulates neutral mutations and saves the output
+    as an tszip format.
+    """
     sys.stderr = open(snakemake.log[0], "w", buffering=1)
 
     ts = tskit.load(snakemake.input.ts)
