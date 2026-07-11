@@ -1,3 +1,8 @@
+# This demes demography file is adapted from OutOfAfrica_4J17 demographic
+# model in stdpopsim described here,
+# https://popsim-consortium.github.io/stdpopsim-docs/stable/catalog.html#sec_catalog_homsap_models_outofafrica_4j17
+# The recent population growth is adapted from Relate's inferred demographic history
+# from 1000 Genomes, https://zenodo.org/records/3234689
 time_units: generations
 generation_time: 1
 demes:

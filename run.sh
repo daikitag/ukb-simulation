@@ -2,8 +2,8 @@
 
 #SBATCH --time 3-00:00
 
-#SBATCH --output="snakemake-log/%A-%x-std-output.out"
-#SBATCH --error="snakemake-log/%A-%x-err-output.out"
+#SBATCH --output="logs/snakemake/%A-%x-std-output.out"
+#SBATCH --error="logs/snakemake/%A-%x-err-output.out"
 
 #SBATCH --mail-user=daiki.tagami@hertford.ox.ac.uk
 #SBATCH --mail-type=ALL
