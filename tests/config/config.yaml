@@ -47,3 +47,6 @@ maf: 0.001
 recombination_position: "resources/recombination_map/recombination_position.csv"
 # Selection scaling parameter
 scaling_selection: 1e10
+
+# flashpca directory - This will be called in snakemake to run flashpca
+flashpca: "/homes/tagami/software/flashpca/flashpca"

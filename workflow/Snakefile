@@ -34,7 +34,6 @@ MAF = config["maf"]
 PROPORTION = config["proportion"]
 GENETIC_SEED = config["genetic_seed"]
 
-PLINK = config["plink"]
 FLASHPCA = config["flashpca"]
 
 # Recombination map directory
@@ -272,18 +271,19 @@ rule process_plink:
         bim=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.bim",
         fam=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.fam",
     output:
-        bed=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.bed",
-        bim=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.bim",
-        fam=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.fam",
+        bed=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.fam",
     log:
         f"logs/{folder_pattern}/process_plink_{vcz_pattern}.log",
+    conda:
+        "envs/plink.yaml"
     params:
         outprefix=lambda wildcards, output: output.bed[:-4],
         inprefix=lambda wildcards, input: input.bed[:-4],
-        plink=PLINK,
     shell:
         """
-        {params.plink} \
+        plink2 \
             --bfile {params.inprefix} \
             --set-all-var-ids @:#:\\$r:\\$a \
             --maf 0.01 \
@@ -294,22 +294,23 @@ rule process_plink:
 
 rule variant_pruning:
     input:
-        bed=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.bed",
-        bim=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.bim",
-        fam=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.fam",
+        bed=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.fam",
     output:
         bed=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bed",
         bim=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bim",
         fam=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.fam",
     log:
         f"logs/{folder_pattern}/variant_pruning_{vcz_pattern}.log",
+    conda:
+        "envs/plink.yaml"
     params:
         outprefix=lambda wildcards, output: output.bed[:-4],
         inprefix=lambda wildcards, input: input.bed[:-4],
-        plink=PLINK,
     shell:
         """
-        {params.plink} \
+        plink2 \
             --bfile {params.inprefix} \
             --out {params.outprefix} \
             --indep-pairwise 1000 80 0.1 >{log}
@@ -323,9 +324,9 @@ rule variant_pruning:
 
 rule run_flashpca:
     input:
-        bed=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bed",
-        bim=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bim",
-        fam=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.fam",
+        bed=f"{folder_pattern}/plink_output/variant_pruning/plink_gwas_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/variant_pruning/plink_gwas_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/variant_pruning/plink_gwas_{vcz_pattern}.fam",
     output:
         eigenvectors=f"{folder_pattern}/plink_output/pca_output/eigenvectors_{vcz_pattern}.txt",
         pcs=f"{folder_pattern}/plink_output/pca_output/pcs_{vcz_pattern}.txt",
@@ -333,6 +334,8 @@ rule run_flashpca:
         pve=f"{folder_pattern}/plink_output/pca_output/pve_{vcz_pattern}.txt",
     log:
         f"logs/{folder_pattern}/run_flashpca_{vcz_pattern}.log",
+    conda:
+        "envs/plink.yaml"
     resources:
         mem_mb=10000,
     params:
