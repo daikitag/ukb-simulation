@@ -324,9 +324,9 @@ rule variant_pruning:
 
 rule run_flashpca:
     input:
-        bed=f"{folder_pattern}/plink_output/variant_pruning/plink_gwas_{vcz_pattern}.bed",
-        bim=f"{folder_pattern}/plink_output/variant_pruning/plink_gwas_{vcz_pattern}.bim",
-        fam=f"{folder_pattern}/plink_output/variant_pruning/plink_gwas_{vcz_pattern}.fam",
+        bed=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.fam",
     output:
         eigenvectors=f"{folder_pattern}/plink_output/pca_output/eigenvectors_{vcz_pattern}.txt",
         pcs=f"{folder_pattern}/plink_output/pca_output/pcs_{vcz_pattern}.txt",
