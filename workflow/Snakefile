@@ -314,7 +314,7 @@ rule variant_pruning:
             --bfile {params.inprefix} \
             --out {params.outprefix} \
             --indep-pairwise 1000 80 0.1 >{log}
-        {params.plink} \
+        plink2 \
             --bfile {params.inprefix} \
             --extract {params.outprefix}.prune.in \
             --make-bed \
