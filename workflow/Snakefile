@@ -88,6 +88,23 @@ pca_output = expand(
     maf=MAF,
 )
 
+plink_bed = expand(
+    f"{folder_pattern}/plink_output/plink_{vcz_pattern}.bed",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+    maf=MAF,
+)
 
 genetic_output = expand(
     f"{folder_pattern}/genetic_value_{genetic_value_pattern}.csv",
@@ -109,8 +126,13 @@ genetic_output = expand(
 
 rule all:
     input:
-        pca_output,
+        plink_bed,
         genetic_output,
+
+
+rule obtain_pca:
+    input:
+        pca_output,
 
 
 rule generate_slim_script:
