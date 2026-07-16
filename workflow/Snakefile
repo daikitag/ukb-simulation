@@ -34,6 +34,9 @@ MAF = config["maf"]
 PROPORTION = config["proportion"]
 GENETIC_SEED = config["genetic_seed"]
 
+PLINK = config["plink"]
+FLASHPCA = config["flashpca"]
+
 # Recombination map directory
 # Modify this string if you would ike to modify the location of recombination map
 get_recombination_map = (
@@ -68,9 +71,8 @@ genetic_value_pattern = (
     f"{sample_tree_seq_pattern}_prop_{{proportion}}_genetic_seed_{{genetic_seed}}"
 )
 
-
-plink_bed = expand(
-    f"{folder_pattern}/plink_output/plink_{vcz_pattern}.bed",
+pca_output = expand(
+    f"{folder_pattern}/plink_output/pca_output/pcs_{vcz_pattern}.txt",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -108,7 +110,7 @@ genetic_output = expand(
 
 rule all:
     input:
-        plink_bed,
+        pca_output,
         genetic_output,
 
 
@@ -262,3 +264,86 @@ rule genetic_value_simulation:
         selection_scaling=SELECTION_SCALING_PARAMETER,
     script:
         "scripts/genetic_value_simulation.py"
+
+
+rule process_plink:
+    input:
+        bed=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/plink_{vcz_pattern}.fam",
+    output:
+        bed=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.bed",
+        bim=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.bim",
+        fam=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.fam",
+    log:
+        f"logs/{folder_pattern}/process_plink_{vcz_pattern}.log",
+    params:
+        outprefix=lambda wildcards, output: output.bed[:-4],
+        inprefix=lambda wildcards, input: input.bed[:-4],
+        plink=PLINK,
+    shell:
+        """
+        {params.plink} \
+            --bfile {params.inprefix} \
+            --set-all-var-ids @:#:\$r:\$a \
+            --maf 0.01 \
+            --make-bed \
+            --out {params.outprefix} >{log}
+        """
+
+
+rule variant_pruning:
+    input:
+        bed=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.bed",
+        bim=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.bim",
+        fam=f"{folder_pattern}/plink_output/plink_{vcz_pattern}_gwas.fam",
+    output:
+        bed=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.fam",
+    log:
+        f"logs/{folder_pattern}/variant_pruning_{vcz_pattern}.log",
+    params:
+        outprefix=lambda wildcards, output: output.bed[:-4],
+        inprefix=lambda wildcards, input: input.bed[:-4],
+        plink=PLINK,
+    shell:
+        """
+        {params.plink} \
+            --bfile {params.inprefix} \
+            --out {params.outprefix} \
+            --indep-pairwise 1000 80 0.1 >{log}
+        {params.plink} \
+            --bfile {params.inprefix} \
+            --extract {params.outprefix}.prune.in \
+            --make-bed \
+            --out {params.outprefix} >>{log}
+        """
+
+
+rule run_flashpca:
+    input:
+        bed=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.fam",
+    output:
+        eigenvectors=f"{folder_pattern}/plink_output/pca_output/eigenvectors_{vcz_pattern}.txt",
+        pcs=f"{folder_pattern}/plink_output/pca_output/pcs_{vcz_pattern}.txt",
+        eigenvalues=f"{folder_pattern}/plink_output/pca_output/eigenvalues_{vcz_pattern}.txt",
+        pve=f"{folder_pattern}/plink_output/pca_output/pve_{vcz_pattern}.txt",
+    log:
+        f"logs/{folder_pattern}/run_flashpca_{vcz_pattern}.log",
+    resources:
+        mem_mb=10000,
+    params:
+        flashpca=FLASHPCA,
+        inprefix=lambda wildcards, input: input.bed[:-4],
+    shell:
+        """
+        {params.flashpca} \
+            --bfile {params.inprefix} \
+            --outpc {output.pcs} \
+            --outvec {output.eigenvectors} \
+            --outval {output.eigenvalues} \
+            --outpve {output.pve} >{log}
+        """

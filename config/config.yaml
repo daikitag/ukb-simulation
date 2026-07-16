@@ -47,3 +47,11 @@ maf: 0.01
 recombination_position: "resources/recombination_map/recombination_position.csv"
 # Selection scaling parameter
 scaling_selection: 1e10
+
+
+# These parameters are used for data preprocessing
+
+# PLINK directory - This will be called in snakemake to run PLINK
+plink: "/homes/tagami/software/plink2"
+# flashpca directory - This will be called in snakemake to run flashpca
+flashpca: "/homes/tagami/software/flashpca/flashpca"
