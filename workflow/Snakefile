@@ -1,6 +1,8 @@
 configfile: "config/config.yaml"
 
 
+##NOTE: Remove ancient() in publication
+
 # These are SLiM simulation parameters
 MU = config["mu"]
 CHROMOSOME = config["chromosome"]
@@ -137,11 +139,15 @@ rule obtain_pca:
 
 rule generate_slim_script:
     input:
-        demography=lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
-        recombination_map_file=lambda wildcards: get_recombination_map.format(
-            chromosome=wildcards.chromosome
+        demography=ancient(
+            lambda wildcards: f"resources/demography/{wildcards.demography}.yaml"
         ),
-        position_file=RECOMBINATION_POSITION,
+        recombination_map_file=ancient(
+            lambda wildcards: get_recombination_map.format(
+                chromosome=wildcards.chromosome
+            )
+        ),
+        position_file=ancient(RECOMBINATION_POSITION),
     output:
         slim_script=f"{folder_pattern}/slim_script.slim",
     log:
@@ -196,11 +202,15 @@ rule recapitate_sample_individuals:
     input:
         ts=f"{folder_pattern}/slim_allele.tree",
         individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
-        demography=lambda wildcards: f"resources/demography/{wildcards.demography}.yaml",
-        recombination_map_file=lambda wildcards: get_recombination_map.format(
-            chromosome=wildcards.chromosome
+        demography=ancient(
+            lambda wildcards: f"resources/demography/{wildcards.demography}.yaml"
         ),
-        position_file=RECOMBINATION_POSITION,
+        recombination_map_file=ancient(
+            lambda wildcards: get_recombination_map.format(
+                chromosome=wildcards.chromosome
+            )
+        ),
+        position_file=ancient(RECOMBINATION_POSITION),
     output:
         ts=f"{folder_pattern}/subset_nucleotide_{sample_tree_seq_pattern}.tree",
     log:
