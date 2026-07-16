@@ -285,7 +285,7 @@ rule process_plink:
         """
         {params.plink} \
             --bfile {params.inprefix} \
-            --set-all-var-ids @:#:\$r:\$a \
+            --set-all-var-ids @:#:\\$r:\\$a \
             --maf 0.01 \
             --make-bed \
             --out {params.outprefix} >{log}
