@@ -73,7 +73,7 @@ genetic_value_pattern = (
 )
 
 pca_output = expand(
-    f"{folder_pattern}/plink_output/pca_output/pcs_{vcz_pattern}.txt",
+    f"{folder_pattern}/plink_output/pca_output/pca_plot_{vcz_pattern}.pdf",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -360,10 +360,10 @@ rule run_flashpca:
         bim=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.bim",
         fam=f"{folder_pattern}/plink_output/variant_pruning/plink_{vcz_pattern}.fam",
     output:
-        eigenvectors=f"{folder_pattern}/plink_output/pca_output/eigenvectors_{vcz_pattern}.txt",
-        pcs=f"{folder_pattern}/plink_output/pca_output/pcs_{vcz_pattern}.txt",
-        eigenvalues=f"{folder_pattern}/plink_output/pca_output/eigenvalues_{vcz_pattern}.txt",
-        pve=f"{folder_pattern}/plink_output/pca_output/pve_{vcz_pattern}.txt",
+        eigenvectors=f"{folder_pattern}/pca_output/eigenvectors_{vcz_pattern}.txt",
+        pcs=f"{folder_pattern}/pca_output/pcs_{vcz_pattern}.txt",
+        eigenvalues=f"{folder_pattern}/pca_output/eigenvalues_{vcz_pattern}.txt",
+        pve=f"{folder_pattern}/pca_output/pve_{vcz_pattern}.txt",
     log:
         f"logs/{folder_pattern}/run_flashpca_{vcz_pattern}.log",
     conda:
@@ -382,3 +382,21 @@ rule run_flashpca:
             --outval {output.eigenvalues} \
             --outpve {output.pve} >{log}
         """
+
+
+rule plot_pca_result:
+    input:
+        pcs=f"{folder_pattern}/plink_output/pca_output/pcs_{vcz_pattern}.txt",
+    output:
+        plot=f"{folder_pattern}/plink_output/pca_output/pca_plot_{vcz_pattern}.pdf",
+    log:
+        f"logs/{folder_pattern}/plot_pca_result_{vcz_pattern}.log",
+    conda:
+        "envs/plot.yaml"
+    resources:
+        mem_mb=20000,
+    params:
+        chromosome=lambda wildcards: wildcards.chromosome,
+        arm=lambda wildcards: wildcards.arm,
+    script:
+        "scripts/genetic_value_simulation.py"
