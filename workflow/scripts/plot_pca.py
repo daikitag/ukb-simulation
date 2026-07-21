@@ -111,7 +111,7 @@ def main():
         ceu_df=ceu_df,
         jpt_df=jpt_df,
         chb_df=chb_df,
-        file_output=snakemake.output,
+        file_output=snakemake.output.plot,
         chromosome=snakemake.params.chromosome,
         arm=snakemake.params.arm,
     )
