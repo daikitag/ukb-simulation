@@ -399,4 +399,4 @@ rule plot_pca_result:
         chromosome=lambda wildcards: wildcards.chromosome,
         arm=lambda wildcards: wildcards.arm,
     script:
-        "scripts/genetic_value_simulation.py"
+        "scripts/plot_pca.py"
