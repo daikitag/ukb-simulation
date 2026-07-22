@@ -466,7 +466,7 @@ rule obtain_sample_thousand_maf:
         chb_maf=f"{folder_pattern}/data_process/chb_sim_maf_{final_ts_pattern}.csv",
         jpt_maf=f"{folder_pattern}/data_process/jpt_sim_maf_{final_ts_pattern}.csv",
     log:
-        f"logs/{folder_pattern}/obtain_sample_thousand_maf_{vcz_pattern}.log",
+        f"logs/{folder_pattern}/obtain_sample_thousand_maf_{final_ts_pattern}.log",
     conda:
         "envs/simulation.yaml"
     params:
