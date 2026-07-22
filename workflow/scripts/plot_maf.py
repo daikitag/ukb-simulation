@@ -52,7 +52,7 @@ def main():
             xlabel="Minor Allele Frequency",
             ylabel="Frequency of SNP",
             ax=ax,
-            title=f"Population: {pop}, {np.sum(thousand_plot) / np.sum(sim_plot)}",
+            title=f"Population: {pop}",
         )
         i += 1
     fig.suptitle(
