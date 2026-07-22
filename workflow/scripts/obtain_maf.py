@@ -82,7 +82,7 @@ def main():
 
         pop_maf = obtain_maf(pop_ts)
         pop_maf_df = pd.DataFrame({"MAF": pop_maf})
-        pop_maf_df.to_csv(snakemake.output[f"{pop.lower()}_maf"])
+        pop_maf_df.to_csv(snakemake.output[f"{pop.lower()}_maf"], index=False)
 
 
 if __name__ == "__main__":

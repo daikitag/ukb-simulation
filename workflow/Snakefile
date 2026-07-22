@@ -139,25 +139,8 @@ genetic_output = expand(
     genetic_seed=GENETIC_SEED,
 )
 
-yri_output_first = expand(
-    f"{folder_pattern}/data_process/yri_thousand_maf_{final_ts_pattern}.csv",
-    mu=MU,
-    demography=DEMOGRAPHY,
-    slim_seed=SLIM_SEED,
-    chromosome=CHROMOSOME,
-    arm=ARM,
-    yri=YRI_NUMBER,
-    ceu=CEU_NUMBER,
-    chb=CHB_NUMBER,
-    jpt=JPT_NUMBER,
-    individual_seed=INDIVIDUAL_SEED,
-    recapitate_seed=RECAPITATE_SEED,
-    neutral_mu=NEUTRAL_MU,
-    neutral_seed=NEUTRAL_SEED,
-)
-
-yri_output_second = expand(
-    f"{folder_pattern}/data_process/yri_sim_maf_{final_ts_pattern}.csv",
+maf_plot_comparison = expand(
+    f"{folder_pattern}/data_process/maf_plot_{final_ts_pattern}.pdf",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -182,8 +165,7 @@ rule all:
 
 rule obtain_maf:
     input:
-        yri_output_first,
-        yri_output_second,
+        maf_plot_comparison,
 
 
 rule obtain_pca:
@@ -469,6 +451,8 @@ rule obtain_sample_thousand_maf:
         f"logs/{folder_pattern}/obtain_sample_thousand_maf_{final_ts_pattern}.log",
     conda:
         "envs/simulation.yaml"
+    resources:
+        mem_mb=100000,
     params:
         yri_number=THOUSAND_YRI_NUM,
         ceu_number=THOUSAND_CEU_NUM,
@@ -493,10 +477,10 @@ rule obtain_thousand_maf:
             )
         ),
     output:
-        yri_maf=f"{folder_pattern}/data_process/yri_thousand_maf_{final_ts_pattern}.csv",
-        ceu_maf=f"{folder_pattern}/data_process/ceu_thousand_maf_{final_ts_pattern}.csv",
-        chb_maf=f"{folder_pattern}/data_process/chb_thousand_maf_{final_ts_pattern}.csv",
-        jpt_maf=f"{folder_pattern}/data_process/jpt_thousand_maf_{final_ts_pattern}.csv",
+        yri_maf=f"{folder_pattern}/data_process/yri_thousand_maf_{final_ts_pattern}.txt",
+        ceu_maf=f"{folder_pattern}/data_process/ceu_thousand_maf_{final_ts_pattern}.txt",
+        chb_maf=f"{folder_pattern}/data_process/chb_thousand_maf_{final_ts_pattern}.txt",
+        jpt_maf=f"{folder_pattern}/data_process/jpt_thousand_maf_{final_ts_pattern}.txt",
     log:
         f"logs/{folder_pattern}/obtain_thousand_maf_{final_ts_pattern}.log",
     conda:
@@ -512,3 +496,26 @@ rule obtain_thousand_maf:
         chromosome=lambda wildcards: wildcards.chromosome,
     script:
         "scripts/obtain_thousand_maf.py"
+
+
+rule plot_maf:
+    input:
+        yri_thousand_maf=f"{folder_pattern}/data_process/yri_thousand_maf_{final_ts_pattern}.txt",
+        ceu_thousand_maf=f"{folder_pattern}/data_process/ceu_thousand_maf_{final_ts_pattern}.txt",
+        chb_thousand_maf=f"{folder_pattern}/data_process/chb_thousand_maf_{final_ts_pattern}.txt",
+        jpt_thousand_maf=f"{folder_pattern}/data_process/jpt_thousand_maf_{final_ts_pattern}.txt",
+        yri_sim_maf=f"{folder_pattern}/data_process/yri_sim_maf_{final_ts_pattern}.csv",
+        ceu_sim_maf=f"{folder_pattern}/data_process/ceu_sim_maf_{final_ts_pattern}.csv",
+        chb_sim_maf=f"{folder_pattern}/data_process/chb_sim_maf_{final_ts_pattern}.csv",
+        jpt_sim_maf=f"{folder_pattern}/data_process/jpt_sim_maf_{final_ts_pattern}.csv",
+    output:
+        plot=f"{folder_pattern}/data_process/maf_plot_{final_ts_pattern}.pdf",
+    log:
+        f"logs/{folder_pattern}/plot_maf_{final_ts_pattern}.log",
+    conda:
+        "envs/plot.yaml"
+    params:
+        arm=lambda wildcards: wildcards.arm,
+        chromosome=lambda wildcards: wildcards.chromosome,
+    script:
+        "scripts/plot_maf.py"
