@@ -46,8 +46,6 @@ THOUSAND_CHB_NUM = config["thousand_chb_num"]
 THOUSAND_JPT_NUM = config["thousand_jpt_num"]
 
 # 1000 Genomes parameter
-THOUSAND_GENOMES_DIRECTORY = config["thousand_genomes_directory"]
-
 THOUSAND_YRI_FOUNDER = config["thousand_yri_founder"]
 THOUSAND_CEU_FOUNDER = config["thousand_ceu_founder"]
 THOUSAND_CHB_FOUNDER = config["thousand_chb_founder"]
