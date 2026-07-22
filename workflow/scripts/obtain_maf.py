@@ -63,7 +63,7 @@ def main():
     chromosome = int(snakemake.params.chromosome)
     arm = snakemake.params.arm
 
-    seed = int(snakemake.params.slim_seed)
+    seed = int(snakemake.params.individual_seed)
 
     # This is used to set the seed for each chromosome and arm as a different
     # interger
