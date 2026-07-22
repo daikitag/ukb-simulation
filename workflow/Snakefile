@@ -36,7 +36,23 @@ MAF = config["maf"]
 PROPORTION = config["proportion"]
 GENETIC_SEED = config["genetic_seed"]
 
+# FlashPCA parameter
 FLASHPCA = config["flashpca"]
+
+# 1000 Genomes vs MAF parameter
+THOUSAND_YRI_NUM = config["thousand_yri_num"]
+THOUSAND_CEU_NUM = config["thousand_ceu_num"]
+THOUSAND_CHB_NUM = config["thousand_chb_num"]
+THOUSAND_JPT_NUM = config["thousand_jpt_num"]
+
+# 1000 Genomes parameter
+THOUSAND_GENOMES_DIRECTORY = config["thousand_genomes_directory"]
+
+THOUSAND_YRI_FOUNDER = config["thousand_yri_founder"]
+THOUSAND_CEU_FOUNDER = config["thousand_ceu_founder"]
+THOUSAND_CHB_FOUNDER = config["thousand_chb_founder"]
+THOUSAND_JPT_FOUNDER = config["thousand_jpt_founder"]
+
 
 # Recombination map directory
 # Modify this string if you would ike to modify the location of recombination map
@@ -125,11 +141,51 @@ genetic_output = expand(
     genetic_seed=GENETIC_SEED,
 )
 
+yri_output_first = expand(
+    f"{folder_pattern}/data_process/yri_thousand_maf_{final_ts_pattern}.csv",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+)
+
+yri_output_second = expand(
+    f"{folder_pattern}/data_process/yri_sim_maf_{final_ts_pattern}.csv",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+)
+
 
 rule all:
     input:
         plink_bed,
         genetic_output,
+
+
+rule obtain_maf:
+    input:
+        yri_output_first,
+        yri_output_second,
 
 
 rule obtain_pca:
@@ -400,3 +456,61 @@ rule plot_pca_result:
         arm=lambda wildcards: wildcards.arm,
     script:
         "scripts/plot_pca.py"
+
+
+rule obtain_sample_thousand_maf:
+    input:
+        ts=f"{folder_pattern}/final_output_{final_ts_pattern}.tree.tsz",
+        individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
+    output:
+        yri_maf=f"{folder_pattern}/data_process/yri_sim_maf_{final_ts_pattern}.csv",
+        ceu_maf=f"{folder_pattern}/data_process/ceu_sim_maf_{final_ts_pattern}.csv",
+        chb_maf=f"{folder_pattern}/data_process/chb_sim_maf_{final_ts_pattern}.csv",
+        jpt_maf=f"{folder_pattern}/data_process/jpt_sim_maf_{final_ts_pattern}.csv",
+    log:
+        f"logs/{folder_pattern}/obtain_sample_thousand_maf_{vcz_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    params:
+        yri_number=THOUSAND_YRI_NUM,
+        ceu_number=THOUSAND_CEU_NUM,
+        chb_number=THOUSAND_CHB_NUM,
+        jpt_number=THOUSAND_JPT_NUM,
+        individual_seed=lambda wildcards: wildcards.individual_seed,
+        arm=lambda wildcards: wildcards.arm,
+        chromosome=lambda wildcards: wildcards.chromosome,
+    script:
+        "scripts/obtain_maf.py"
+
+
+get_thousand_genomes = "/homes/tagami/1000genomes/1kGP_high_coverage_Illumina.chr{chromosome}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz"
+
+
+rule obtain_thousand_maf:
+    input:
+        position_file=ancient(RECOMBINATION_POSITION),
+        thousand_genomes=ancient(
+            lambda wildcards: get_thousand_genomes.format(
+                chromosome=wildcards.chromosome
+            )
+        ),
+    output:
+        yri_maf=f"{folder_pattern}/data_process/yri_thousand_maf_{final_ts_pattern}.csv",
+        ceu_maf=f"{folder_pattern}/data_process/ceu_thousand_maf_{final_ts_pattern}.csv",
+        chb_maf=f"{folder_pattern}/data_process/chb_thousand_maf_{final_ts_pattern}.csv",
+        jpt_maf=f"{folder_pattern}/data_process/jpt_thousand_maf_{final_ts_pattern}.csv",
+    log:
+        f"logs/{folder_pattern}/obtain_thousand_maf_{final_ts_pattern}.log",
+    conda:
+        "envs/bcftools.yaml"
+    resources:
+        mem_mb=10000,
+    params:
+        yri_founder=THOUSAND_YRI_FOUNDER,
+        ceu_founder=THOUSAND_CEU_FOUNDER,
+        chb_founder=THOUSAND_CHB_FOUNDER,
+        jpt_founder=THOUSAND_JPT_FOUNDER,
+        arm=lambda wildcards: wildcards.arm,
+        chromosome=lambda wildcards: wildcards.chromosome,
+    script:
+        "scripts/obtain_thousand_maf.py"

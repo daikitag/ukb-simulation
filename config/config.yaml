@@ -53,3 +53,18 @@ scaling_selection: 1e10
 
 # flashpca directory - This will be called in snakemake to run flashpca
 flashpca: "/homes/tagami/software/flashpca/flashpca"
+
+# Comparison with 1000 Genomes
+# Number of founder individuals in the 1000 Genomes Project
+thousand_yri_num: 121
+thousand_jpt_num: 104
+thousand_chb_num: 103
+thousand_ceu_num: 122
+
+
+# 1000 Genomes analysis
+# CSV file with 1000 Genomes founder individual IDs
+thousand_yri_founder: "/homes/tagami/1000genomes/founder_pop_yri.txt"
+thousand_ceu_founder: "/homes/tagami/1000genomes/founder_pop_ceu.txt"
+thousand_chb_founder: "/homes/tagami/1000genomes/founder_pop_chb.txt"
+thousand_jpt_founder: "/homes/tagami/1000genomes/founder_pop_jpt.txt"
