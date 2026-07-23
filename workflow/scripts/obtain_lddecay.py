@@ -168,7 +168,8 @@ def main():
         with tempfile.TemporaryDirectory() as temp_dir:
             vcf_file_name = os.path.join(temp_dir, "analysis.vcf")
 
-            pop_ts.write_vcf(vcf_file_name)
+            with open(vcf_file_name, "w") as vcf_file:
+                pop_ts.write_vcf(vcf_file)
 
             lddecay_command = [
                 snakemake.params.poplddecay,
@@ -180,7 +181,9 @@ def main():
                 snakemake.output[f"{pop}_ld_decay"],
             ]
 
-            subprocess.run(lddecay_command, check=True)
+            subprocess.run(
+                lddecay_command, check=True, stdout=sys.stderr, stderr=sys.stderr
+            )
 
 
 if __name__ == "__main__":
