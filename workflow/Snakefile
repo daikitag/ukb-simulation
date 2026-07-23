@@ -159,25 +159,8 @@ maf_plot_comparison = expand(
     neutral_seed=NEUTRAL_SEED,
 )
 
-lddecay_yri_sim = expand(
-    f"{folder_pattern}/data_process/ld_decay/yri_sim_ld_decay_{final_ts_pattern}.stat.gz",
-    mu=MU,
-    demography=DEMOGRAPHY,
-    slim_seed=SLIM_SEED,
-    chromosome=CHROMOSOME,
-    arm=ARM,
-    yri=YRI_NUMBER,
-    ceu=CEU_NUMBER,
-    chb=CHB_NUMBER,
-    jpt=JPT_NUMBER,
-    individual_seed=INDIVIDUAL_SEED,
-    recapitate_seed=RECAPITATE_SEED,
-    neutral_mu=NEUTRAL_MU,
-    neutral_seed=NEUTRAL_SEED,
-)
-
-lddecay_yri_thousand = expand(
-    f"{folder_pattern}/data_process/ld_decay/yri_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+lddecay_plot_comparison = expand(
+    f"{folder_pattern}/data_process/ld_decay/ld_decay_plot_{final_ts_pattern}.pdf",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -202,8 +185,7 @@ rule all:
 
 rule obtain_lddecay:
     input:
-        lddecay_yri_sim,
-        lddecay_yri_thousand,
+        lddecay_plot_comparison,
 
 
 rule obtain_maf:
@@ -621,3 +603,26 @@ rule obtain_sim_ld_decay:
         poplddecay=POPLDDECAY,
     script:
         "scripts/obtain_lddecay.py"
+
+
+rule plot_ld_decay:
+    input:
+        yri_thousand_ld_decay=f"{folder_pattern}/data_process/ld_decay/yri_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+        ceu_thousand_ld_decay=f"{folder_pattern}/data_process/ld_decay/ceu_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+        chb_thousand_ld_decay=f"{folder_pattern}/data_process/ld_decay/chb_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+        jpt_thousand_ld_decay=f"{folder_pattern}/data_process/ld_decay/jpt_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+        yri_sim_ld_decay=f"{folder_pattern}/data_process/ld_decay/yri_sim_ld_decay_{final_ts_pattern}.stat.gz",
+        ceu_sim_ld_decay=f"{folder_pattern}/data_process/ld_decay/ceu_sim_ld_decay_{final_ts_pattern}.stat.gz",
+        chb_sim_ld_decay=f"{folder_pattern}/data_process/ld_decay/chb_sim_ld_decay_{final_ts_pattern}.stat.gz",
+        jpt_sim_ld_decay=f"{folder_pattern}/data_process/ld_decay/jpt_sim_ld_decay_{final_ts_pattern}.stat.gz",
+    output:
+        plot=f"{folder_pattern}/data_process/ld_decay/ld_decay_plot_{final_ts_pattern}.pdf",
+    log:
+        f"logs/{folder_pattern}/plot_maf_{final_ts_pattern}.log",
+    conda:
+        "envs/plot.yaml"
+    params:
+        arm=lambda wildcards: wildcards.arm,
+        chromosome=lambda wildcards: wildcards.chromosome,
+    script:
+        "scripts/plot_lddecay.py"
