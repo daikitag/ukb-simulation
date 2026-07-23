@@ -465,7 +465,7 @@ rule obtain_sample_thousand_maf:
         "scripts/obtain_maf.py"
 
 
-get_thousand_genomes = "/homes/tagami/1000genomes/1kGP_high_coverage_Illumina.chr{chromosome}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz"
+get_thousand_genomes = "resources/1000genomes/1kGP_high_coverage_Illumina.chr{chromosome}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz"
 
 
 rule obtain_thousand_maf:
