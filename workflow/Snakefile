@@ -51,6 +51,9 @@ THOUSAND_CEU_FOUNDER = config["thousand_ceu_founder"]
 THOUSAND_CHB_FOUNDER = config["thousand_chb_founder"]
 THOUSAND_JPT_FOUNDER = config["thousand_jpt_founder"]
 
+# PopLDdecay parameter
+POPLDDECAY = config["PopLDdecay"]
+
 
 # Recombination map directory
 # Modify this string if you would ike to modify the location of recombination map
@@ -519,3 +522,62 @@ rule plot_maf:
         chromosome=lambda wildcards: wildcards.chromosome,
     script:
         "scripts/plot_maf.py"
+
+
+rule obtain_thousand_ld_decay:
+    input:
+        position_file=ancient(RECOMBINATION_POSITION),
+        thousand_genomes=ancient(
+            lambda wildcards: get_thousand_genomes.format(
+                chromosome=wildcards.chromosome
+            )
+        ),
+    output:
+        yri_ld_decay=f"{folder_pattern}/data_process/ld_decay/yri_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+        ceu_ld_decay=f"{folder_pattern}/data_process/ld_decay/ceu_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+        chb_ld_decay=f"{folder_pattern}/data_process/ld_decay/chb_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+        jpt_ld_decay=f"{folder_pattern}/data_process/ld_decay/jpt_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+    log:
+        f"logs/{folder_pattern}/obtain_thousand_ld_decay_{final_ts_pattern}.log",
+    conda:
+        "envs/bcftools.yaml"
+    resources:
+        mem_mb=10000,
+    params:
+        yri_founder=THOUSAND_YRI_FOUNDER,
+        ceu_founder=THOUSAND_CEU_FOUNDER,
+        chb_founder=THOUSAND_CHB_FOUNDER,
+        jpt_founder=THOUSAND_JPT_FOUNDER,
+        arm=lambda wildcards: wildcards.arm,
+        chromosome=lambda wildcards: wildcards.chromosome,
+        poplddecay=POPLDDECAY,
+    script:
+        "scripts/obtain_thousand_lddecay.py"
+
+
+rule obtain_sim_ld_decay:
+    input:
+        ts=f"{folder_pattern}/final_output_{final_ts_pattern}.tree.tsz",
+        individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
+    output:
+        yri_ld_decay=f"{folder_pattern}/data_process/ld_decay/yri_sim_ld_decay_{final_ts_pattern}.stat.gz",
+        ceu_ld_decay=f"{folder_pattern}/data_process/ld_decay/ceu_sim_ld_decay_{final_ts_pattern}.stat.gz",
+        chb_ld_decay=f"{folder_pattern}/data_process/ld_decay/chb_sim_ld_decay_{final_ts_pattern}.stat.gz",
+        jpt_ld_decay=f"{folder_pattern}/data_process/ld_decay/jpt_sim_ld_decay_{final_ts_pattern}.stat.gz",
+    log:
+        f"logs/{folder_pattern}/obtain_sim_ld_decay_{final_ts_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    resources:
+        mem_mb=100000,
+    params:
+        yri_number=THOUSAND_YRI_NUM,
+        ceu_number=THOUSAND_CEU_NUM,
+        chb_number=THOUSAND_CHB_NUM,
+        jpt_number=THOUSAND_JPT_NUM,
+        individual_seed=lambda wildcards: wildcards.individual_seed,
+        arm=lambda wildcards: wildcards.arm,
+        chromosome=lambda wildcards: wildcards.chromosome,
+        poplddecay=POPLDDECAY,
+    script:
+        "scripts/obtain_lddecay.py"

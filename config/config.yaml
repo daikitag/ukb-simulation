@@ -68,3 +68,7 @@ thousand_yri_founder: "/homes/tagami/1000genomes/founder_pop_yri.txt"
 thousand_ceu_founder: "/homes/tagami/1000genomes/founder_pop_ceu.txt"
 thousand_chb_founder: "/homes/tagami/1000genomes/founder_pop_chb.txt"
 thousand_jpt_founder: "/homes/tagami/1000genomes/founder_pop_jpt.txt"
+
+
+# PopLDdecay directory - This will be called in snakemake to run PopLDdecay
+PopLDdecay: "/homes/tagami/software/PopLDdecay/bin/PopLDdecay"
