@@ -178,7 +178,7 @@ def main():
                 "-MAF",
                 "0.05",
                 "-OutStat",
-                snakemake.output[f"{pop}_ld_decay"],
+                snakemake.output[f"{pop.lower()}_ld_decay"],
             ]
 
             subprocess.run(
