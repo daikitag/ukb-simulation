@@ -159,11 +159,51 @@ maf_plot_comparison = expand(
     neutral_seed=NEUTRAL_SEED,
 )
 
+lddecay_yri_sim = expand(
+    f"{folder_pattern}/data_process/ld_decay/yri_sim_ld_decay_{final_ts_pattern}.stat.gz",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+)
+
+lddecay_yri_thousand = expand(
+    f"{folder_pattern}/data_process/ld_decay/yri_thousand_ld_decay_{final_ts_pattern}.stat.gz",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+)
+
 
 rule all:
     input:
         plink_bed,
         genetic_output,
+
+
+rule obtain_lddecay:
+    input:
+        lddecay_yri_sim,
+        lddecay_yri_thousand,
 
 
 rule obtain_maf:
