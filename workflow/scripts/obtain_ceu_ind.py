@@ -25,17 +25,8 @@ def main():
     rng = np.random.default_rng(seed=seed)
 
     individual_id = rng.choice(ceu_df["IID"], size=num_ceu_gwas, replace=False)
-    individual_id_df = pd.DataFrame({"FID": individual_id, "IID": individual_id})
-    individual_id_df.to_csv(
-        snakemake.output.individual_id, sep="\t", index=False, header=False
-    )
-
-    genetic_df = pd.read_csv(snakemake.input.genetic_df)
-
-    ts_ind_id = [int(x.split("_")[1]) for x in individual_id]
-    genetic_df = genetic_df[genetic_df["individual_id"].isin(ts_ind_id)]
-
-    genetic_df.to_csv(snakemake.output.genetic_value, index=False)
+    individual_id_df = pd.DataFrame({"#FID": individual_id, "IID": individual_id})
+    individual_id_df.to_csv(snakemake.output.individual_id, sep="\t", index=False)
 
 
 if __name__ == "__main__":

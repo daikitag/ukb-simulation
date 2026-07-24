@@ -92,6 +92,8 @@ genetic_value_pattern = (
     f"{sample_tree_seq_pattern}_prop_{{proportion}}_genetic_seed_{{genetic_seed}}"
 )
 
+gwas_pattern = f"{vcz_pattern}_prop_{{proportion}}_genetic_seed_{{genetic_seed}}"
+
 pca_output = expand(
     f"{folder_pattern}/plink_output/pca_output/pca_plot_{vcz_pattern}.pdf",
     mu=MU,
@@ -179,8 +181,8 @@ lddecay_plot_comparison = expand(
     neutral_seed=NEUTRAL_SEED,
 )
 
-ceu_ind_id_gwas = expand(
-    f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
+ceu_genetic_gwas = expand(
+    f"{folder_pattern}/gwas_output/ceu_genetic_value_{gwas_pattern}.csv",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -195,6 +197,8 @@ ceu_ind_id_gwas = expand(
     neutral_mu=NEUTRAL_MU,
     neutral_seed=NEUTRAL_SEED,
     maf=MAF,
+    proportion=PROPORTION,
+    genetic_seed=GENETIC_SEED,
 )
 
 
@@ -221,7 +225,7 @@ rule obtain_pca:
 
 rule obtain_ceu_gwas:
     input:
-        ceu_ind_id_gwas,
+        ceu_genetic_gwas,
 
 
 rule generate_slim_script:
@@ -657,12 +661,10 @@ rule plot_ld_decay:
 rule obtain_ceu_ind_id:
     input:
         pcs=f"{folder_pattern}/pca_output/pcs_{vcz_pattern}.txt",
-        genetic_df=f"{folder_pattern}/genetic_value_{genetic_value_pattern}.csv",
     output:
         individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
-        genetic_value=f"{folder_pattern}/gwas_output/ceu_genetic_value_{genetic_value_pattern}.csv",
     log:
-        f"logs/{folder_pattern}/obtain_ceu_ind_id_{vcz_pattern}_{genetic_value_pattern}.log",
+        f"logs/{folder_pattern}/obtain_ceu_ind_id_{vcz_pattern}.log",
     conda:
         "envs/simulation.yaml"
     params:
@@ -673,3 +675,17 @@ rule obtain_ceu_ind_id:
         num_ceu_gwas=NUM_CEU_GWAS,
     script:
         "scripts/obtain_ceu_ind.py"
+
+
+rule obtain_ceu_genetic_value:
+    input:
+        genetic_df=f"{folder_pattern}/genetic_value_{genetic_value_pattern}.csv",
+        individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
+    output:
+        genetic_df=f"{folder_pattern}/gwas_output/ceu_genetic_value_{gwas_pattern}.csv",
+    log:
+        f"logs/{folder_pattern}/obtain_ceu_genetic_value_{gwas_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/obtain_ceu_genetic_value.py"
