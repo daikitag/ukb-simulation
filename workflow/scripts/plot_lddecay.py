@@ -1,3 +1,5 @@
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -56,6 +58,7 @@ def plot_lddecay(sim_df, thousand_df, chromosome, file_name):
 
 
 def main():
+    sys.stderr = open(snakemake.log[0], "w", buffering=1)
     thousand_df = {}
     sim_df = {}
 
@@ -65,8 +68,8 @@ def main():
             snakemake.input[f"{pop}_thousand_ld_decay"], sep="\t"
         )
 
-        thousand_df[pop] = ld_decay_meanbin(sim_original_df)
-        sim_df[pop] = ld_decay_meanbin(thousand_original_df)
+        thousand_df[pop] = ld_decay_meanbin(thousand_original_df)
+        sim_df[pop] = ld_decay_meanbin(sim_original_df)
 
     chromosome = str(snakemake.params.chromosome)
     arm = snakemake.params.arm

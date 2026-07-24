@@ -54,6 +54,9 @@ THOUSAND_JPT_FOUNDER = config["thousand_jpt_founder"]
 # PopLDdecay parameter
 POPLDDECAY = config["PopLDdecay"]
 
+# GWAS parameter
+PC1 = config["PC1"]
+NUM_CEU_GWAS = config["num_ceu_gwas"]
 
 # Recombination map directory
 # Modify this string if you would ike to modify the location of recombination map
@@ -626,3 +629,24 @@ rule plot_ld_decay:
         chromosome=lambda wildcards: wildcards.chromosome,
     script:
         "scripts/plot_lddecay.py"
+
+
+rule obtain_ceu_ind_id:
+    input:
+        pcs=f"{folder_pattern}/pca_output/pcs_{vcz_pattern}.txt",
+        genetic_df=f"{folder_pattern}/genetic_value_{genetic_value_pattern}.csv",
+    output:
+        individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
+        genetic_value=f"{folder_pattern}/gwas_output/ceu_genetic_value_{vcz_pattern}.csv",
+    log:
+        f"logs/{folder_pattern}/obtain_ceu_ind_id_{vcz_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    params:
+        individual_seed=lambda wildcards: wildcards.individual_seed,
+        arm=lambda wildcards: wildcards.arm,
+        chromosome=lambda wildcards: wildcards.chromosome,
+        pc1=PC1,
+        num_ceu_gwas=NUM_CEU_GWAS,
+    script:
+        "scripts/obtain_ceu_ind.py"

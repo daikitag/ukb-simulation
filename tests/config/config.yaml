@@ -69,3 +69,9 @@ thousand_jpt_founder: "/homes/tagami/1000genomes/founder_pop_jpt.txt"
 
 # PopLDdecay directory - This will be called in snakemake to run PopLDdecay
 PopLDdecay: "/homes/tagami/software/PopLDdecay/bin/PopLDdecay"
+
+# GWAS parameters
+# Threshold of PC1
+PC1: 0
+# Number of CEU individuals to take in the simulation
+num_ceu_gwas: 360390
