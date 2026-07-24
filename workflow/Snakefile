@@ -179,6 +179,24 @@ lddecay_plot_comparison = expand(
     neutral_seed=NEUTRAL_SEED,
 )
 
+ceu_genetic_value_gwas = expand(
+    f"{folder_pattern}/gwas_output/ceu_genetic_value_{vcz_pattern}.csv",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+    maf=MAF,
+)
+
 
 rule all:
     input:
@@ -199,6 +217,11 @@ rule obtain_maf:
 rule obtain_pca:
     input:
         pca_output,
+
+
+rule obtain_ceu_gwas:
+    input:
+        ceu_genetic_value_gwas,
 
 
 rule generate_slim_script:
