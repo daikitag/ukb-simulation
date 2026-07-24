@@ -179,8 +179,8 @@ lddecay_plot_comparison = expand(
     neutral_seed=NEUTRAL_SEED,
 )
 
-ceu_genetic_value_gwas = expand(
-    f"{folder_pattern}/gwas_output/ceu_genetic_value_{vcz_pattern}.csv",
+ceu_ind_id_gwas = expand(
+    f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -221,7 +221,7 @@ rule obtain_pca:
 
 rule obtain_ceu_gwas:
     input:
-        ceu_genetic_value_gwas,
+        ceu_ind_id_gwas,
 
 
 rule generate_slim_script:
@@ -660,7 +660,7 @@ rule obtain_ceu_ind_id:
         genetic_df=f"{folder_pattern}/genetic_value_{genetic_value_pattern}.csv",
     output:
         individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
-        genetic_value=f"{folder_pattern}/gwas_output/ceu_genetic_value_{vcz_pattern}.csv",
+        genetic_value=f"{folder_pattern}/gwas_output/ceu_genetic_value_{genetic_value_pattern}.csv",
     log:
         f"logs/{folder_pattern}/obtain_ceu_ind_id_{vcz_pattern}.log",
     conda:
