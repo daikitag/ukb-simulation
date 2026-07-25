@@ -1,7 +1,10 @@
+import sys
+
 import pandas as pd
 
 
 def main():
+    sys.stderr = open(snakemake.log[0], "w", buffering=1)
     genetic_df = pd.read_csv(snakemake.input.genetic_df)
     individual_df = pd.read_csv(snakemake.input.individual_id, sep="\t")
 

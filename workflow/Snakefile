@@ -57,6 +57,8 @@ POPLDDECAY = config["PopLDdecay"]
 # GWAS parameter
 PC1 = config["PC1"]
 NUM_CEU_GWAS = config["num_ceu_gwas"]
+GWAS_PHENOTYPE = config["gwas_phenotype"]
+MANC_COJO = config["Manc-COJO"]
 
 # Recombination map directory
 # Modify this string if you would ike to modify the location of recombination map
@@ -92,7 +94,9 @@ genetic_value_pattern = (
     f"{sample_tree_seq_pattern}_prop_{{proportion}}_genetic_seed_{{genetic_seed}}"
 )
 
-gwas_pattern = f"{vcz_pattern}_prop_{{proportion}}_genetic_seed_{{genetic_seed}}"
+genetic_vcz_pattern = f"{vcz_pattern}_prop_{{proportion}}_genetic_seed_{{genetic_seed}}"
+
+gwas_pattern = f"{vcz_pattern}_phenotype_{{gwas_phenotype}}"
 
 pca_output = expand(
     f"{folder_pattern}/plink_output/pca_output/pca_plot_{vcz_pattern}.pdf",
@@ -182,7 +186,7 @@ lddecay_plot_comparison = expand(
 )
 
 ceu_genetic_gwas = expand(
-    f"{folder_pattern}/gwas_output/ceu_genetic_value_{gwas_pattern}.csv",
+    f"{folder_pattern}/gwas_output/ceu_genetic_value_{genetic_vcz_pattern}.csv",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -201,11 +205,35 @@ ceu_genetic_gwas = expand(
     genetic_seed=GENETIC_SEED,
 )
 
+gwas_cojo_result = expand(
+    f"{folder_pattern}/gwas_output/cojo_result_{gwas_pattern}.sumstat",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+    maf=MAF,
+    gwas_phenotype=GWAS_PHENOTYPE,
+)
+
 
 rule all:
     input:
         plink_bed,
         genetic_output,
+
+
+rule conduct_gwas_cojo:
+    input:
+        gwas_cojo_result,
 
 
 rule obtain_lddecay:
@@ -682,10 +710,80 @@ rule obtain_ceu_genetic_value:
         genetic_df=f"{folder_pattern}/genetic_value_{genetic_value_pattern}.csv",
         individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
     output:
-        genetic_df=f"{folder_pattern}/gwas_output/ceu_genetic_value_{gwas_pattern}.csv",
+        genetic_df=f"{folder_pattern}/gwas_output/ceu_genetic_value_{genetic_vcz_pattern}.csv",
     log:
-        f"logs/{folder_pattern}/obtain_ceu_genetic_value_{gwas_pattern}.log",
+        f"logs/{folder_pattern}/obtain_ceu_genetic_value_{genetic_vcz_pattern}.log",
     conda:
         "envs/simulation.yaml"
     script:
         "scripts/obtain_ceu_genetic_value.py"
+
+
+get_thousand_genomes = "resources/phenotype/{gwas_phenotype}.txt"
+
+
+rule obtain_plink_phenotype:
+    input:
+        individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
+        phenotype_df=lambda wildcards: get_thousand_genomes.format(
+            gwas_phenotype=wildcards.gwas_phenotype
+        ),
+    output:
+        plink_phenotype=f"{folder_pattern}/gwas_output/plink_phenotype_{gwas_pattern}.txt",
+    log:
+        f"logs/{folder_pattern}/obtain_plink_phenotype_{gwas_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    params:
+        gwas_phenotype=lambda wildcards: wildcards.gwas_phenotype,
+    script:
+        "scripts/obtain_plink_phenotype.py"
+
+
+rule conduct_gwas:
+    input:
+        bed=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.fam",
+        plink_phenotype=f"{folder_pattern}/gwas_output/plink_phenotype_{gwas_pattern}.txt",
+        pcs=f"{folder_pattern}/pca_output/pcs_{vcz_pattern}.txt",
+    output:
+        gwas_result=f"{folder_pattern}/gwas_output/gwas_result_{gwas_pattern}.{{gwas_phenotype}}.glm.linear",
+    log:
+        f"logs/{folder_pattern}/conduct_gwas_{gwas_pattern}.log",
+    conda:
+        "envs/plink.yaml"
+    params:
+        out_prefix=f"{folder_pattern}/gwas_output/gwas_result_{gwas_pattern}",
+    shell:
+        """
+        plink2 \
+            --bed {input.bed} \
+            --bim {input.bim} \
+            --fam {input.fam} \
+            --glm \
+            --covar {input.pcs} \
+            --pheno {input.plink_phenotype} \
+            --pheno-name {wildcards.gwas_phenotype} \
+            --out {params.out_prefix} &>{log}
+        """
+
+
+rule run_cojo:
+    input:
+        gwas_result=f"{folder_pattern}/gwas_output/gwas_result_{gwas_pattern}.{{gwas_phenotype}}.glm.linear",
+        bed=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.fam",
+        individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
+    output:
+        cojo_file=f"{folder_pattern}/gwas_output/cojo_file_{gwas_pattern}.ma",
+        cojo_result=f"{folder_pattern}/gwas_output/cojo_result_{gwas_pattern}.sumstat",
+    log:
+        f"logs/{folder_pattern}/run_cojo_{gwas_pattern}.log",
+    conda:
+        "envs/plink.yaml"
+    params:
+        manc_cojo=MANC_COJO,
+    script:
+        "scripts/conduct_cojo.py"
