@@ -206,7 +206,7 @@ ceu_genetic_gwas = expand(
 )
 
 gwas_cojo_result = expand(
-    f"{folder_pattern}/gwas_output/cojo_result_{gwas_pattern}.sumstat",
+    f"{folder_pattern}/gwas_output/cojo_result_{gwas_pattern}.sumstat.jma.cojo",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
