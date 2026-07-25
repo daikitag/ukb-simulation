@@ -79,6 +79,9 @@ PC1: 0
 # Number of CEU individuals to take in the simulation
 num_ceu_gwas: 360390
 
+# Put a phenotype file named this under "resources/phenotype/"
+# The file format of this text file should be ".txt" and it should contain
+# a column named "phenotype"
 gwas_phenotype: "height_simulation"
 
 # Manc-COJO directory - This will be called in snakemake to run Manc-COJO

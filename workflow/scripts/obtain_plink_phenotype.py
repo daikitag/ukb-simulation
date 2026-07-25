@@ -7,7 +7,7 @@ def obtain_plink_phenotype(phenotype_df, individual_id_df, phenotype_name):
     plink_phenotype_df = pd.DataFrame(
         {
             "FID": individual_id_df["#FID"].tolist(),
-            "IID": individual_id_df["IIF"].tolist(),
+            "IID": individual_id_df["IID"].tolist(),
             phenotype_name: phenotype_df["phenotype"].to_list(),
         }
     )

@@ -75,3 +75,8 @@ PopLDdecay: "/homes/tagami/software/PopLDdecay/bin/PopLDdecay"
 PC1: 0
 # Number of CEU individuals to take in the simulation
 num_ceu_gwas: 360390
+
+gwas_phenotype: "height_simulation"
+
+# Manc-COJO directory - This will be called in snakemake to run Manc-COJO
+Manc-COJO: "/homes/tagami/software/manc_cojo"
