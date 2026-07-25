@@ -10,6 +10,7 @@ def main():
     sys.stderr = open(snakemake.log[0], "w", buffering=1)
 
     gwas_result = pd.read_csv(snakemake.input.gwas_result, sep="\t")
+    gwas_result = gwas_result[gwas_result["TEST"] == "ADD"]
 
     cojo_df = pd.DataFrame(
         {
