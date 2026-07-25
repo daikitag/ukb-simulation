@@ -9,7 +9,8 @@ def main():
     individual_df = pd.read_csv(snakemake.input.individual_id, sep="\t")
 
     ts_ind_id = [int(x.split("_")[1]) for x in individual_df["IID"]]
-    genetic_df = genetic_df[genetic_df["individual_id"].isin(ts_ind_id)]
+
+    genetic_df = genetic_df.set_index("individual_id").loc[ts_ind_id].reset_index()
 
     genetic_df.to_csv(snakemake.output.genetic_df, index=False)
 
