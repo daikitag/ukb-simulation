@@ -753,6 +753,10 @@ rule conduct_gwas:
         f"logs/{folder_pattern}/conduct_gwas_{gwas_pattern}.log",
     conda:
         "envs/plink.yaml"
+    threads: 6
+    resources:
+        cpus_per_task=6,
+        mem_mb=150000,
     params:
         out_prefix=lambda wildcards, output: output.gwas_result.removesuffix(
             f".{wildcards.gwas_phenotype}.glm.linear"
@@ -767,6 +771,7 @@ rule conduct_gwas:
             --covar {input.pcs} \
             --pheno {input.plink_phenotype} \
             --pheno-name {wildcards.gwas_phenotype} \
+            --threads {threads} \
             --out {params.out_prefix} &>{log}
         """
 
