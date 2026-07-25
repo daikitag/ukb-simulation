@@ -785,7 +785,7 @@ rule run_cojo:
         individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
     output:
         cojo_file=f"{folder_pattern}/gwas_output/cojo_file_{gwas_pattern}.ma",
-        cojo_result=f"{folder_pattern}/gwas_output/cojo_result_{gwas_pattern}.sumstat",
+        cojo_result=f"{folder_pattern}/gwas_output/cojo_result_{gwas_pattern}.sumstat.jma.cojo",
     log:
         f"logs/{folder_pattern}/run_cojo_{gwas_pattern}.log",
     conda:
