@@ -754,7 +754,9 @@ rule conduct_gwas:
     conda:
         "envs/plink.yaml"
     params:
-        out_prefix=f"{folder_pattern}/gwas_output/gwas_result_{gwas_pattern}",
+        out_prefix=lambda wildcards, output: output.gwas_result.removesuffix(
+            f".{wildcards.gwas_phenotype}.glm.linear"
+        ),
     shell:
         """
         plink2 \
