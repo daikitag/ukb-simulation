@@ -251,7 +251,7 @@ rule obtain_pca:
         pca_output,
 
 
-rule obtain_ceu_gwas:
+rule obtain_ceu_genetic_value:
     input:
         ceu_genetic_gwas,
 
