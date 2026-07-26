@@ -408,6 +408,8 @@ rule genetic_value_simulation:
         f"logs/{folder_pattern}/genetic_value_simulation_{genetic_value_pattern}.log",
     conda:
         "envs/simulation.yaml"
+    resources:
+        mem_mb=20000,
     params:
         proportion=lambda wildcards: wildcards.proportion,
         genetic_seed=lambda wildcards: wildcards.genetic_seed,
