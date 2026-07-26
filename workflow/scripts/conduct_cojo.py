@@ -54,7 +54,7 @@ def main():
                 "--cojo-file",
                 snakemake.output.cojo_file,
                 "--out",
-                snakemake.output.cojo_result,
+                snakemake.output.cojo_result.removesuffix(".sumstat.jma.cojo"),
                 "--cojo-p",
                 "1e-6",
                 "--cojo-slct",

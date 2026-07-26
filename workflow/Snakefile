@@ -767,7 +767,7 @@ rule conduct_gwas:
             --bed {input.bed} \
             --bim {input.bim} \
             --fam {input.fam} \
-            --glm \
+            --glm omit-ref \
             --covar {input.pcs} \
             --pheno {input.plink_phenotype} \
             --pheno-name {wildcards.gwas_phenotype} \
