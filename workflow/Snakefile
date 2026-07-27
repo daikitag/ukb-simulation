@@ -758,7 +758,7 @@ rule conduct_gwas:
     threads: 6
     resources:
         cpus_per_task=6,
-        mem_mb=150000,
+        mem_mb=20000,
     params:
         out_prefix=lambda wildcards, output: output.gwas_result.removesuffix(
             f".{wildcards.gwas_phenotype}.glm.linear"
@@ -787,11 +787,13 @@ rule run_cojo:
         individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
     output:
         cojo_file=f"{folder_pattern}/gwas_output/cojo_file_{gwas_pattern}.ma",
-        cojo_result=f"{folder_pattern}/gwas_output/cojo_result_{gwas_pattern}.sumstat.jma.cojo",
+        cojo_result=f"{folder_pattern}/gwas_output/cojo_result_{gwas_pattern}.jma.cojo",
     log:
         f"logs/{folder_pattern}/run_cojo_{gwas_pattern}.log",
     conda:
         "envs/plink.yaml"
+    resources:
+        mem_mb=50000,
     params:
         manc_cojo=MANC_COJO,
     script:
