@@ -793,7 +793,7 @@ rule run_cojo:
     conda:
         "envs/plink.yaml"
     resources:
-        mem_mb=50000,
+        mem_mb=100000,
     params:
         manc_cojo=MANC_COJO,
     script:
