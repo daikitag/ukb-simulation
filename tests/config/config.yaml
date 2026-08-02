@@ -80,3 +80,9 @@ gwas_phenotype: "height_simulation"
 
 # Manc-COJO directory - This will be called in snakemake to run Manc-COJO
 Manc-COJO: "/homes/tagami/software/manc_cojo"
+
+# COJO directory - This will be called in snakemake to run COJO
+COJO: "/homes/tagami/software/gcta-1.95.1-linux-x86_64/gcta64"
+
+# MAF threshold to compute ld score
+LD_Score_MAF: 0.01
