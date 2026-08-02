@@ -226,11 +226,34 @@ gwas_cojo_result = expand(
     gwas_phenotype=GWAS_PHENOTYPE,
 )
 
+ld_score_result = expand(
+    f"{folder_pattern}/gwas_output/ld_score_{vcz_pattern}.score.ld",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+    maf=MAF,
+)
+
 
 rule all:
     input:
         plink_bed,
         genetic_output,
+
+
+rule obtain_ld_score:
+    input:
+        ld_score_result,
 
 
 rule conduct_gwas_cojo:
