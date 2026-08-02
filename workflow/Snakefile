@@ -59,6 +59,8 @@ PC1 = config["PC1"]
 NUM_CEU_GWAS = config["num_ceu_gwas"]
 GWAS_PHENOTYPE = config["gwas_phenotype"]
 MANC_COJO = config["Manc-COJO"]
+COJO = config["COJO"]
+LD_SCORE_MAF = config["LD_Score_MAF"]
 
 # Recombination map directory
 # Modify this string if you would ike to modify the location of recombination map
@@ -798,3 +800,26 @@ rule run_cojo:
         manc_cojo=MANC_COJO,
     script:
         "scripts/conduct_cojo.py"
+
+
+rule compute_ldscore:
+    input:
+        bed=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.fam",
+        individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
+    output:
+        ld_score=f"{folder_pattern}/gwas_output/ld_score_{vcz_pattern}.score.ld",
+    log:
+        f"logs/{folder_pattern}/compute_ldscore_{vcz_pattern}.log",
+    conda:
+        "envs/plink.yaml"
+    threads: 10
+    resources:
+        cpus_per_task=10,
+        mem_mb=80000,
+    params:
+        cojo=COJO,
+        maf=LD_SCORE_MAF,
+    script:
+        "scripts/calculate_ldscore.py"
