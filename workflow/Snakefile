@@ -840,7 +840,7 @@ rule compute_ldscore:
     threads: 10
     resources:
         cpus_per_task=10,
-        mem_mb=80000,
+        mem_mb=100000,
     params:
         cojo=COJO,
         maf=LD_SCORE_MAF,
