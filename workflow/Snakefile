@@ -846,3 +846,17 @@ rule compute_ldscore:
         maf=LD_SCORE_MAF,
     script:
         "scripts/calculate_ldscore.py"
+
+
+rule add_ldscore_cojo:
+    input:
+        cojo_result=f"{folder_pattern}/gwas_output/cojo_result_{gwas_pattern}.jma.cojo",
+        ld_score=f"{folder_pattern}/gwas_output/ld_score_{vcz_pattern}.score.ld",
+    output:
+        cojo_ld_score=f"{folder_pattern}/gwas_output/cojo_result_ld_score_{gwas_pattern}.csv",
+    log:
+        f"logs/{folder_pattern}/add_ldscore_cojo_{gwas_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/add_ldscore_cojo.py"
