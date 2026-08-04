@@ -226,8 +226,8 @@ gwas_cojo_result = expand(
     gwas_phenotype=GWAS_PHENOTYPE,
 )
 
-ld_score_result = expand(
-    f"{folder_pattern}/gwas_output/ld_score_{vcz_pattern}.score.ld",
+cojo_ld_score_result = expand(
+    f"{folder_pattern}/gwas_output/cojo_result_ld_score_{gwas_pattern}.csv",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -242,6 +242,7 @@ ld_score_result = expand(
     neutral_mu=NEUTRAL_MU,
     neutral_seed=NEUTRAL_SEED,
     maf=MAF,
+    gwas_phenotype=GWAS_PHENOTYPE,
 )
 
 
@@ -251,9 +252,9 @@ rule all:
         genetic_output,
 
 
-rule obtain_ld_score:
+rule obtain_cojo_ld_score:
     input:
-        ld_score_result,
+        cojo_ld_score_result,
 
 
 rule conduct_gwas_cojo:
