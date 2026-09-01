@@ -170,6 +170,24 @@ maf_plot_comparison = expand(
     neutral_seed=NEUTRAL_SEED,
 )
 
+tree_summary_statistics = expand(
+    f"{folder_pattern}/tsz_info_{final_ts_pattern}.txt",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+)
+
+
 lddecay_plot_comparison = expand(
     f"{folder_pattern}/data_process/ld_decay/ld_decay_plot_{final_ts_pattern}.pdf",
     mu=MU,
@@ -280,6 +298,11 @@ rule obtain_pca:
 rule simulate_ceu_genetic_value:
     input:
         ceu_genetic_gwas,
+
+
+rule obtain_ts_summary_statistics:
+    input:
+        tree_summary_statistics,
 
 
 rule generate_slim_script:
@@ -861,3 +884,16 @@ rule add_ldscore_cojo:
         "envs/simulation.yaml"
     script:
         "scripts/add_ldscore_cojo.py"
+
+
+rule obtain_tree_info:
+    input:
+        tsz=f"{folder_pattern}/final_output_{final_ts_pattern}.tree.tsz",
+    output:
+        tree_info=f"{folder_pattern}/tsz_info_{final_ts_pattern}.txt",
+    log:
+        f"logs/{folder_pattern}/obtain_tree_info_{final_ts_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    script:
+        "scripts/obtain_tree_info.py"
