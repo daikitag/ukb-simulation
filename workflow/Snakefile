@@ -101,7 +101,7 @@ genetic_vcz_pattern = f"{vcz_pattern}_prop_{{proportion}}_genetic_seed_{{genetic
 gwas_pattern = f"{vcz_pattern}_phenotype_{{gwas_phenotype}}"
 
 pca_output = expand(
-    f"{folder_pattern}/plink_output/pca_output/pca_plot_{vcz_pattern}.pdf",
+    f"{folder_pattern}/pca_output/pca_plot_{vcz_pattern}.pdf",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -556,9 +556,9 @@ rule run_flashpca:
 
 rule plot_pca_result:
     input:
-        pcs=f"{folder_pattern}/plink_output/pca_output/pcs_{vcz_pattern}.txt",
+        pcs=f"{folder_pattern}/pca_output/pcs_{vcz_pattern}.txt",
     output:
-        plot=f"{folder_pattern}/plink_output/pca_output/pca_plot_{vcz_pattern}.pdf",
+        plot=f"{folder_pattern}/pca_output/pca_plot_{vcz_pattern}.pdf",
     log:
         f"logs/{folder_pattern}/plot_pca_result_{vcz_pattern}.log",
     conda:
