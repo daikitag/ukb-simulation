@@ -770,13 +770,13 @@ rule obtain_ceu_genetic_value:
         "scripts/obtain_ceu_genetic_value.py"
 
 
-get_thousand_genomes = "resources/phenotype/{gwas_phenotype}.txt"
+get_thousand_genomes_phenotype = "resources/phenotype/{gwas_phenotype}.txt"
 
 
 rule obtain_plink_phenotype:
     input:
         individual_id=f"{folder_pattern}/gwas_output/ceu_ind_id_{vcz_pattern}.txt",
-        phenotype_df=lambda wildcards: get_thousand_genomes.format(
+        phenotype_df=lambda wildcards: get_thousand_genomes_phenotype.format(
             gwas_phenotype=wildcards.gwas_phenotype
         ),
     output:
