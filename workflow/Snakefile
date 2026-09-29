@@ -973,6 +973,8 @@ rule subset_cojo:
         f"logs/{folder_pattern}/subset_cojo_{gwas_pattern}.log",
     conda:
         "envs/simulation.yaml"
+    resources:
+        mem_mb=10000,
     script:
         "scripts/subset_cojo.py"
 
@@ -989,6 +991,8 @@ rule plink_score:
         f"logs/{folder_pattern}/plink_score_{gwas_pattern}.log",
     conda:
         "envs/plink.yaml"
+    resources:
+        mem_mb=50000,
     params:
         outprefix=lambda wildcards, output: output.score_result[:-7],
         inprefix=lambda wildcards, input: input.bed[:-4],
