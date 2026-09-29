@@ -281,7 +281,7 @@ maf_causal_result = expand(
 )
 
 pgs_result = expand(
-    f"{folder_pattern}/gwas_output/subset_cojo_result_{gwas_pattern}.txt",
+    f"{folder_pattern}/gwas_output/plink_score_result_{gwas_pattern}.sscore",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
@@ -975,3 +975,27 @@ rule subset_cojo:
         "envs/simulation.yaml"
     script:
         "scripts/subset_cojo.py"
+
+
+rule plink_score:
+    input:
+        cojo_df=f"{folder_pattern}/gwas_output/subset_cojo_result_{gwas_pattern}.txt",
+        bed=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bed",
+        bim=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.bim",
+        fam=f"{folder_pattern}/plink_output/plink_gwas_{vcz_pattern}.fam",
+    output:
+        score_result=f"{folder_pattern}/gwas_output/plink_score_result_{gwas_pattern}.sscore",
+    log:
+        f"logs/{folder_pattern}/plink_score_{gwas_pattern}.log",
+    conda:
+        "envs/plink.yaml"
+    params:
+        outprefix=lambda wildcards, output: output.score_result[:-7],
+        inprefix=lambda wildcards, input: input.bed[:-4],
+    shell:
+        """
+        plink2 \
+            --bfile {params.inprefix} \
+            --score {input.cojo_df} 1 2 3 header \
+            --out {params.outprefix} >>{log}
+        """
