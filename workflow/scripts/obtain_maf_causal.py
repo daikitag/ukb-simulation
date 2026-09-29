@@ -24,9 +24,10 @@ def count_site_alleles(ts, tree, site):
     return counts
 
 
-def obtain_maf(ts):
+def obtain_maf_df(ts):
     maf_count = []
     causal_list = []
+    time_list = []
 
     tree = tskit.Tree(ts)
 
@@ -40,12 +41,18 @@ def obtain_maf(ts):
 
         maf_count.append(1 - freq)
 
+        time_list.append(ts.site(i).mutations[0].time)
+
         if ts.site(i).mutations[0].metadata["mutation_list"] != []:
             causal_list.append(1)
         else:
             causal_list.append(0)
 
-    return maf_count, causal_list
+    causal_maf_df = pd.DataFrame(
+        {"MAF": maf_count, "causal": causal_list, "time": time_list}
+    )
+
+    return causal_maf_df
 
 
 def subset_tree_seq(ts, selected_individuals):
@@ -70,8 +77,7 @@ def main():
         pop_df = individual_id_df[individual_id_df.population == pop]
         pop_ts = subset_tree_seq(ts, pop_df.individual_id)
 
-        pop_maf, pop_causal = obtain_maf(pop_ts)
-        pop_maf_df = pd.DataFrame({"MAF": pop_maf, "causal": pop_causal})
+        pop_maf_df = obtain_maf_df(pop_ts)
         pop_maf_df = pop_maf_df[pop_maf_df.MAF >= 0.01]
         pop_maf_df.to_csv(snakemake.output[f"{pop.lower()}_maf_causal"], index=False)
 
