@@ -921,7 +921,7 @@ rule obtain_tree_info:
         "scripts/obtain_tree_info.py"
 
 
-rule obtain_sample_thousand_maf:
+rule obtain_maf_causal_pop:
     input:
         ts=f"{folder_pattern}/final_output_{final_ts_pattern}.tree.tsz",
         individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
