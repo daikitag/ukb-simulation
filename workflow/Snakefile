@@ -263,6 +263,23 @@ cojo_ld_score_result = expand(
     gwas_phenotype=GWAS_PHENOTYPE,
 )
 
+maf_causal_result = expand(
+    f"{folder_pattern}/data_process/yri_sim_maf_causal_{final_ts_pattern}.csv",
+    mu=MU,
+    demography=DEMOGRAPHY,
+    slim_seed=SLIM_SEED,
+    chromosome=CHROMOSOME,
+    arm=ARM,
+    yri=YRI_NUMBER,
+    ceu=CEU_NUMBER,
+    chb=CHB_NUMBER,
+    jpt=JPT_NUMBER,
+    individual_seed=INDIVIDUAL_SEED,
+    recapitate_seed=RECAPITATE_SEED,
+    neutral_mu=NEUTRAL_MU,
+    neutral_seed=NEUTRAL_SEED,
+)
+
 
 rule all:
     input:
@@ -303,6 +320,11 @@ rule simulate_ceu_genetic_value:
 rule obtain_ts_summary_statistics:
     input:
         tree_summary_statistics,
+
+
+rule obtain_maf_causal:
+    input:
+        maf_causal_result,
 
 
 rule generate_slim_script:
@@ -897,3 +919,22 @@ rule obtain_tree_info:
         "envs/simulation.yaml"
     script:
         "scripts/obtain_tree_info.py"
+
+
+rule obtain_sample_thousand_maf:
+    input:
+        ts=f"{folder_pattern}/final_output_{final_ts_pattern}.tree.tsz",
+        individual_id=f"{folder_pattern}/individual_id_{individual_id_pattern}.csv",
+    output:
+        yri_maf_causal=f"{folder_pattern}/data_process/yri_sim_maf_causal_{final_ts_pattern}.csv",
+        ceu_maf_causal=f"{folder_pattern}/data_process/ceu_sim_maf_causal_{final_ts_pattern}.csv",
+        chb_maf_causal=f"{folder_pattern}/data_process/chb_sim_maf_causal_{final_ts_pattern}.csv",
+        jpt_maf_causal=f"{folder_pattern}/data_process/jpt_sim_maf_causal_{final_ts_pattern}.csv",
+    log:
+        f"logs/{folder_pattern}/obtain_sample_thousand_maf_{final_ts_pattern}.log",
+    conda:
+        "envs/simulation.yaml"
+    resources:
+        mem_mb=100000,
+    script:
+        "scripts/obtain_maf_causal.py"
