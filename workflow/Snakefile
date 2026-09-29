@@ -281,7 +281,7 @@ maf_causal_result = expand(
 )
 
 pgs_result = expand(
-    cojo_df=f"{folder_pattern}/gwas_output/subset_cojo_result_{gwas_pattern}.txt",
+    f"{folder_pattern}/gwas_output/subset_cojo_result_{gwas_pattern}.txt",
     mu=MU,
     demography=DEMOGRAPHY,
     slim_seed=SLIM_SEED,
