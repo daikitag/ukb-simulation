@@ -56,7 +56,22 @@ def main():
         "IID"
     ].to_numpy()
 
-    ceu_candidates = ceu_id[~np.isin(ceu_id, ceu_gwas_id)]
+    ceu_id_num = np.array(
+        [int(iid.split("_", 1)[1]) for iid in ceu_id],
+        dtype=np.int64,
+    )
+
+    ceu_gwas_id_num = np.array(
+        [int(iid.split("_", 1)[1]) for iid in ceu_gwas_id],
+        dtype=np.int64,
+    )
+
+    max_id = max(ceu_id_num.max(), ceu_gwas_id_num.max())
+
+    gwas_lookup = np.zeros(max_id + 1, dtype=bool)
+    gwas_lookup[ceu_gwas_id_num] = True
+
+    ceu_candidates = ceu_id[~gwas_lookup[ceu_id_num]]
 
     selected_ceu_iid = rng.choice(
         ceu_candidates, size=int(snakemake.params.ceu_number), replace=False
